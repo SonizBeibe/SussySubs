@@ -556,6 +556,9 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         // Raised when the user clicks the video surface (row 0), not the controls row.
         public event EventHandler<PointerPressedEventArgs>? SurfacePointerPressed;
+        public event EventHandler<PointerEventArgs>? SurfacePointerMoved;
+        public event EventHandler<PointerReleasedEventArgs>? SurfacePointerReleased;
+
 
         // Enable/disable click-to-toggle behavior (default on)
         public bool ClickToTogglePlay { get; set; } = true;
@@ -613,6 +616,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         private void OnMainGridPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
+            SurfacePointerReleased?.Invoke(this, e);
             if (!_surfaceLeftButtonDown)
             {
                 return;

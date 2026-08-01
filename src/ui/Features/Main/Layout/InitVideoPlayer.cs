@@ -74,7 +74,9 @@ public static class InitVideoPlayer
         control.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
         control.ToggleDisplayProgressTextModeRequested += () => { vm.ToggleVideoPlayerDisplayTimeLeftCommand.Execute(null); };
         control.VideoFileNamePointerPressed += vm.VideoPlayerControlPointerPressed;
-        control.SurfacePointerPressed += (_, _) => vm.VideoPlayerAreaPointerPressed();
+        control.SurfacePointerPressed += (_, e) => vm.VideoPlayerAreaPointerPressed(e);
+        control.SurfacePointerMoved += (_, e) => vm.VideoPlayerAreaPointerMoved(e);
+        control.SurfacePointerReleased += (_, e) => vm.VideoPlayerAreaPointerReleased(e);
         control.UserSeeked += vm.OnVideoPlayerUserSeeked;
         // Freeze the interpolated waveform cursor the instant a pause is requested from the
         // player itself (toolbar button / click on the video); without this the cursor keeps

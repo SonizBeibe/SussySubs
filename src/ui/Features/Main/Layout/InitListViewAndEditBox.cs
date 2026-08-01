@@ -1260,6 +1260,60 @@ public static partial class InitListViewAndEditBox
         }
         panelLayer.Children.Add(upDownLayer);
         timeControlsPanel.Children.Add(panelLayer);
+        // Style display
+        var panelStyle = new StackPanel
+        {
+            Spacing = 0,
+            Orientation = Orientation.Vertical,
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.HasFormatStyle)),
+            Margin = new Thickness(0, 0, 10, 0),
+        };
+        var labelStyle = new TextBlock
+        {
+            Text = Se.Language.General.Style,
+            FontWeight = FontWeight.Bold,
+        }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
+        panelStyle.Children.Add(labelStyle);
+        var comboStyle = new ComboBox
+        {
+            DataContext = vm,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.AssaStyles)),
+            [!ComboBox.SelectedItemProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Style)}")
+            {
+                Mode = BindingMode.TwoWay
+            }
+        };
+        panelStyle.Children.Add(comboStyle);
+        timeControlsPanel.Children.Add(panelStyle);
+
+        // Effect display
+        var panelEffect = new StackPanel
+        {
+            Spacing = 0,
+            Orientation = Orientation.Vertical,
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.HasFormatStyle)),
+            Margin = new Thickness(0, 0, 10, 0),
+        };
+        var labelEffect = new TextBlock
+        {
+            Text = "Effect",
+            FontWeight = FontWeight.Bold,
+        }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
+        panelEffect.Children.Add(labelEffect);
+        var comboEffect = new ComboBox
+        {
+            DataContext = vm,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.AssaEffects)),
+            [!ComboBox.SelectedItemProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Effect)}")
+            {
+                Mode = BindingMode.TwoWay
+            }
+        };
+        panelEffect.Children.Add(comboEffect);
+        timeControlsPanel.Children.Add(panelEffect);
+
 
         if (!Se.Settings.Appearance.ShowUpDownStartTime ||
             !Se.Settings.Appearance.ShowUpDownEndTime || 

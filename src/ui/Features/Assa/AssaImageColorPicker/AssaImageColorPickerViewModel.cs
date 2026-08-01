@@ -306,6 +306,6 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
 
     private static string ColorToHex(Color color)
     {
-        return $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2}";
+        return $"\\1c&H{color.B:X2}{color.G:X2}{color.R:X2}& \\1a&H{255 - color.A:X2}&";
     }
 }
