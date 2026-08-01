@@ -197,6 +197,12 @@ public partial class MainViewModel :
     IApplySsaStyles
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
+    private bool _autoGenerateYtt = false;
+    public bool AutoGenerateYtt
+    {
+        get => _autoGenerateYtt;
+        set => SetProperty(ref _autoGenerateYtt, value);
+    }
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
     private List<SubtitleLineViewModel>? _selectedSubtitles;
     [ObservableProperty] private int? _selectedSubtitleIndex;
@@ -278,6 +284,8 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isVideoOffsetVisible;
     [ObservableProperty] private bool _isAudioTracksVisible;
     [ObservableProperty] private ObservableCollection<WaveformAudioTrackItem> _waveformAudioTracks;
+    [ObservableProperty] private ObservableCollection<string> _assaStyles = new();
+    [ObservableProperty] private ObservableCollection<string> _assaEffects = new();
     [ObservableProperty] private WaveformAudioTrackItem? _selectedWaveformAudioTrack;
     [ObservableProperty] private bool _isWaveformGenerating;
     [ObservableProperty] private string _waveformGeneratingText;
@@ -3101,6 +3109,56 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
+    [RelayCommand]
+    private async Task ExportYtt()
+    {
+        var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(Window);
+        if (topLevel == null) return;
+        var file = await topLevel.StorageProvider.SaveFilePickerAsync(new Avalonia.Platform.Storage.FilePickerSaveOptions
+        {
+            Title = "Exportar a YTT",
+            DefaultExtension = "ytt",
+            FileTypeChoices = new[] { new Avalonia.Platform.Storage.FilePickerFileType("YTT files") { Patterns = new[] { "*.ytt" } } }
+        });
+
+        if (file == null) return;
+        var fileName = file.Path.LocalPath;
+
+        var tempAss = System.IO.Path.GetTempFileName() + ".ass";
+        var text = GetUpdateSubtitle(true).ToText(new Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha());
+        await System.IO.File.WriteAllTextAsync(tempAss, text);
+
+        try
+        {
+            var ytsubconverterPath = @"ytsubconverter.exe";
+            if (!System.IO.File.Exists(ytsubconverterPath))
+            {
+                ytsubconverterPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ytsubconverter.exe");
+            }
+
+            if (System.IO.File.Exists(ytsubconverterPath))
+            {
+                var processInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = ytsubconverterPath,
+                    Arguments = $"\"{tempAss}\" \"{fileName}\"",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+                var p = System.Diagnostics.Process.Start(processInfo);
+                if (p != null) await p.WaitForExitAsync();
+            }
+        }
+        catch
+        {
+        }
+        finally
+        {
+            if (System.IO.File.Exists(tempAss))
+                System.IO.File.Delete(tempAss);
+        }
+    }
+
 
     [RelayCommand]
     private async Task ExportEbuStl()
@@ -17459,6 +17517,12 @@ public partial class MainViewModel :
         {
             Subtitles.Add(new SubtitleLineViewModel(p, SelectedSubtitleFormat));
         }
+        if (SelectedSubtitleFormat is Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha || SelectedSubtitleFormat is Nikse.SubtitleEdit.Core.SubtitleFormats.SubStationAlpha)
+        {
+            var styles = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetSsaStylesFromHeader(_subtitle.Header);
+            AssaStyles = new System.Collections.ObjectModel.ObservableCollection<string>(styles.Select(s => s.Name));
+        }
+
 
         if (subtitleOriginal != null)
         {
@@ -17696,6 +17760,28 @@ public partial class MainViewModel :
         _lastOpenSaveFormat = SelectedSubtitleFormat;
 
         new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
+
+        if (AutoGenerateYtt && !isAutoSave)
+        {
+            try
+            {
+                var ytsubconverterPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ytsubconverter.exe");
+                if (System.IO.File.Exists(ytsubconverterPath))
+                {
+                    var processInfo = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = ytsubconverterPath,
+                        Arguments = $"\"{_subtitleFileName}\"",
+                        CreateNoWindow = true,
+                        UseShellExecute = false
+                    };
+                    System.Diagnostics.Process.Start(processInfo);
+                }
+            }
+            catch
+            {
+            }
+        }
 
         return true;
     }
@@ -21733,6 +21819,18 @@ public partial class MainViewModel :
 
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
+        if (!_subtitleGridSelectionChangedSkip)
+        {
+            var selItems = SubtitleGrid?.SelectedItems;
+            if (selItems != null && selItems.Count > 0)
+            {
+                if (selItems != null && selItems.Count > 0 && selItems[0] is SubtitleLineViewModel firstSelectedItem && VideoPlayerControl != null && VideoPlayerControl.IsLoaded)
+                {
+                    VideoPlayerControl.Position = firstSelectedItem.StartTime.TotalSeconds;
+                }
+            }
+        }
+
         if (_subtitleGridSelectionChangedSkip)
         {
             return;
@@ -23646,6 +23744,12 @@ public partial class MainViewModel :
         HasFormatStyle = SelectedSubtitleFormat is AdvancedSubStationAlpha or SubStationAlpha;
         ShowLayer = IsFormatAssa && Se.Settings.Appearance.ShowLayer;
         ShowLayerFilterIcon = IsFormatAssa && Se.Settings.Appearance.ShowLayer && _visibleLayers != null;
+        if (IsFormatAssa || IsFormatSsa)
+        {
+            var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(_subtitle.Header);
+            AssaStyles = new System.Collections.ObjectModel.ObservableCollection<string>(styles.Select(s => s.Name));
+        }
+
 
         if (!IsFormatAssa)
         {
@@ -23984,13 +24088,70 @@ public partial class MainViewModel :
         }
     }
 
-    internal void VideoPlayerAreaPointerPressed()
+
+    private bool _isDraggingPos = false;
+
+    internal void VideoPlayerAreaPointerPressed(Avalonia.Input.PointerPressedEventArgs e)
     {
         if (string.IsNullOrEmpty(_videoFileName))
         {
             Dispatcher.UIThread.Post(async () => { await CommandVideoOpen(); });
+            return;
+        }
+
+        if (IsFormatAssa && SelectedSubtitle != null)
+        {
+            _isDraggingPos = true;
+            UpdatePosFromEvent(e);
         }
     }
+
+    internal void VideoPlayerAreaPointerMoved(Avalonia.Input.PointerEventArgs e)
+    {
+        if (_isDraggingPos && IsFormatAssa && SelectedSubtitle != null)
+        {
+            UpdatePosFromEvent(e);
+        }
+    }
+
+    internal void VideoPlayerAreaPointerReleased(Avalonia.Input.PointerReleasedEventArgs e)
+    {
+        if (_isDraggingPos && IsFormatAssa && SelectedSubtitle != null)
+        {
+            UpdatePosFromEvent(e);
+            _isDraggingPos = false;
+        }
+    }
+
+    private void UpdatePosFromEvent(Avalonia.Input.PointerEventArgs e)
+    {
+        if (VideoPlayerControl == null || SelectedSubtitle == null) return;
+        var point = e.GetPosition(VideoPlayerControl);
+
+        // Calculate coordinates based on video resolution (assumes 1920x1080 default, or you can extract from _mediaInfo)
+        double vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
+        double vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
+
+        double cWidth = VideoPlayerControl.Bounds.Width;
+        double cHeight = VideoPlayerControl.Bounds.Height;
+
+        if (cWidth == 0 || cHeight == 0) return;
+
+        int x = (int)(point.X * (vidWidth / cWidth));
+        int y = (int)(point.Y * (vidHeight / cHeight));
+
+        var text = SelectedSubtitle.Text;
+        if (text.Contains("\\pos("))
+        {
+            text = System.Text.RegularExpressions.Regex.Replace(text, @"\\pos\([^)]*\)", $"\\pos({x},{y})");
+        }
+        else
+        {
+            text = $"{{\\pos({x},{y})}}" + text;
+        }
+        SelectedSubtitle.Text = text;
+    }
+
 
     internal void ComboBoxSubtitleFormatPointerPressed(object? sender, PointerPressedEventArgs e)
     {
