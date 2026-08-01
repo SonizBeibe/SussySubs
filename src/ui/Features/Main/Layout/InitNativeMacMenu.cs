@@ -407,29 +407,7 @@ public static class InitNativeMacMenu
         var helpItems = new NativeMenu();
         helpItems.Items.Add(Item($"{Clean(Se.Language.Title)} {Clean(l.HelpTitle)}", v => v.ShowHelpCommand));
 
-        // ── ASSA Tools ────────────────────────────────────────────────────────
-        var assaList = new List<NativeMenuItem>
-        {
-            Item(Clean(l.AssaProgressBar), v => v.ShowAssaGenerateProgressBarCommand),
-            Item(Clean(l.AssaChangeResolution), v => v.ShowAssaChangeResolutionCommand),
-            Item(Clean(l.AssaGenerateBackground), v => v.ShowAssaGenerateBackgroundCommand),
-            Item(Clean(l.AssaImageColorPicker), v => v.ShowAssaImageColorPickerCommand),
-            Item(Clean(l.AssaSetPosition), v => v.ShowAssaSetPositionCommand),
-            Item(Clean(l.AssaApplyAdvancedEffects), v => v.ShowAssaApplyAdvancedEffectCommand),
-            Item(Clean(l.AssaApplyCustomOverrideTags), v => v.ShowAssaApplyCustomOverrideTagsCommand),
-            Item(Clean(l.AssaDraw), v => v.ShowAssaDrawCommand),
-            Item(Clean(l.AssaFontCollector), v => v.ShowAssaFontCollectorCommand),
-            Item(Clean(l.AssaProperties), v => v.ShowAssaPropertiesCommand),
-            Item(Clean(l.AssaAttachments), v => v.ShowAssaAttachmentsCommand),
-            Item(Clean(l.AssaStyles), v => v.ShowAssaStylesCommand),
-        };
-        var assaItems = new NativeMenu();
-        foreach (var assaItem in assaList.OrderBy(i => i.Header?.Replace("_", string.Empty)))
-            assaItems.Items.Add(assaItem);
-        assaItems.Items.Add(new NativeMenuItemSeparator());
-        assaItems.Items.Add(Item(Clean(l.FilterLayersForDisplayDotDotDot), v => v.ShowPickLayerFilterCommand));
-        var assaMenu = new NativeMenuItem(Clean(l.AssaTools)) { Menu = assaItems };
-        state.Visibilities.Add((assaMenu, v => v.IsFormatAssa, [nameof(MainViewModel.IsFormatAssa)]));
+
 
         // ── Assemble ──────────────────────────────────────────────────────────
         root.Items.Add(new NativeMenuItem(Clean(l.File)) { Menu = fileItems });
@@ -450,7 +428,7 @@ public static class InitNativeMacMenu
         root.Items.Add(state.WindowListItem);
 
         root.Items.Add(new NativeMenuItem(Clean(l.HelpTitle)) { Menu = helpItems });
-        root.Items.Add(assaMenu);
+
 
         _building = null;
 
