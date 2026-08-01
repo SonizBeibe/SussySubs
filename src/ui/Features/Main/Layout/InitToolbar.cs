@@ -336,110 +336,13 @@ public static class InitToolbar
             isLastSeparator = false;
         }
 
-        if (!isLastSeparator)
+        stackPanelLeft.Children.Add(new CheckBox
         {
-            var assaSeparator = MakeSeparator();
-            stackPanelLeft.Children.Add(assaSeparator);
-            assaSeparator.DataContext = vm;
-            assaSeparator.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.TwoWay });
-
-            var ssaSeparator = MakeSeparator();
-            stackPanelLeft.Children.Add(ssaSeparator);
-            ssaSeparator.DataContext = vm;
-            ssaSeparator.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatSsa)) { Mode = BindingMode.TwoWay });
-
-            isLastSeparator = true;
-        }
-
-        stackPanelLeft.Children.Add(new Button
-        {
-            Content = MakeImage("AssaStyle"),
-            Command = vm.ShowAssaStylesCommand,
-            Background = Brushes.Transparent,
-            [AutomationProperties.NameProperty] = languageHints.AssaStylesHint,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.AssaStylesHint, shortcuts, nameof(vm.ShowAssaStylesCommand)),
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
-            {
-                Source = vm,
-            },
-        });
-
-        stackPanelLeft.Children.Add(new Button
-        {
-            Content = MakeImage("AssaStyle"),
-            Command = vm.ShowSsaStylesCommand,
-            Background = Brushes.Transparent,
-            [AutomationProperties.NameProperty] = languageHints.SsaStylesHint,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SsaStylesHint, shortcuts, nameof(vm.ShowSsaStylesCommand)),
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatSsa))
-            {
-                Source = vm,
-            },
-        });
-
-        stackPanelLeft.Children.Add(new Button
-        {
-            Content = MakeImage("AssaProperties"),
-            Command = vm.ShowSsaPropertiesCommand,
-            Background = Brushes.Transparent,
-            [AutomationProperties.NameProperty] = languageHints.SsaPropertiesHint,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SsaPropertiesHint, shortcuts, nameof(vm.ShowSsaPropertiesCommand)),
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatSsa))
-            {
-                Source = vm,
-            },
-        });
-
-        stackPanelLeft.Children.Add(new Button
-        {
-            Content = MakeImage("AssaAttachments"),
-            Command = vm.ShowSsaAttachmentsCommand,
-            Background = Brushes.Transparent,
-            [AutomationProperties.NameProperty] = languageHints.SsaAttachmentsHint,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SsaAttachmentsHint, shortcuts, nameof(vm.ShowSsaAttachmentsCommand)),
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatSsa))
-            {
-                Source = vm,
-            },
-        });
-
-        stackPanelLeft.Children.Add(new Button
-        {
-            Content = MakeImage("AssaProperties"),
-            Command = vm.ShowAssaPropertiesCommand,
-            Background = Brushes.Transparent,
-            [AutomationProperties.NameProperty] = languageHints.AssaPropertiesHint,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.AssaPropertiesHint, shortcuts, nameof(vm.ShowAssaPropertiesCommand)),
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
-            {
-                Source = vm,
-            },
-        });
-
-        stackPanelLeft.Children.Add(new Button
-        {
-            Content = MakeImage("AssaAttachments"),
-            Command = vm.ShowAssaAttachmentsCommand,
-            Background = Brushes.Transparent,
-            [AutomationProperties.NameProperty] = languageHints.AssaAttachmentsHint,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.AssaAttachmentsHint, shortcuts, nameof(vm.ShowAssaAttachmentsCommand)),
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
-            {
-                Source = vm,
-            },
-        });
-
-        stackPanelLeft.Children.Add(new Button
-        {
-            Content = MakeImage("AssaDraw"),
-            Command = vm.ShowAssaDrawCommand,
-            Background = Brushes.Transparent,
-            [AutomationProperties.NameProperty] = languageHints.AssaDrawHint,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.AssaDrawHint, shortcuts, nameof(vm.ShowAssaDrawCommand)),
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
-            {
-                Source = vm,
-            },
+            Content = "Auto-generar YTT/SRV3 (requiere ytsubconverter.exe)",
+            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.AutoGenerateYtt)),
+            DataContext = vm,
+            Margin = new Thickness(15, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
         });
 
         var stackPanelRight = new StackPanel
@@ -452,7 +355,7 @@ public static class InitToolbar
         };
 
         // subtitle formats
-        stackPanelRight.Children.Add(new TextBlock
+        stackPanelLeft.Children.Add(new TextBlock
         {
             Text = Se.Language.General.Format,
             VerticalAlignment = VerticalAlignment.Center,
@@ -480,12 +383,12 @@ public static class InitToolbar
             vm.ComboBoxSubtitleFormatPointerPressed,
             RoutingStrategies.Tunnel,
             handledEventsToo: true);
-        stackPanelRight.Children.Add(comboBoxSubtitleFormat);
+        stackPanelLeft.Children.Add(comboBoxSubtitleFormat);
         isLastSeparator = false;
 
         if (appearance.ToolbarShowEncoding)
         {
-            stackPanelRight.Children.Add(new TextBlock
+            stackPanelLeft.Children.Add(new TextBlock
             {
                 Text = Se.Language.General.Encoding,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -499,12 +402,12 @@ public static class InitToolbar
                 [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedEncoding)),
                 DataContext = vm,
             };
-            stackPanelRight.Children.Add(comboBoxEncoding);
+            stackPanelLeft.Children.Add(comboBoxEncoding);
         }
 
         if (appearance.ToolbarShowFrameRate)
         {
-            stackPanelRight.Children.Add(new TextBlock
+            stackPanelLeft.Children.Add(new TextBlock
             {
                 Text = Se.Language.General.FrameRate,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -518,7 +421,7 @@ public static class InitToolbar
                 [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedFrameRate)),
                 DataContext = vm,
             };
-            stackPanelRight.Children.Add(comboBoxFrameRate);
+            stackPanelLeft.Children.Add(comboBoxFrameRate);
             comboBoxFrameRate.SelectionChanged += vm.ComboBoxFrameRateSelectionChanged;
         }
 
