@@ -136,6 +136,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             set => SetValue(FullScreenIsVisibleProperty, value);
         }
 
+        public Grid VisualPosOverlayGrid { get; private set; }
         private bool _isFullScreen = false;
 
         public event Action<bool>? IsFullScreenChanged;
