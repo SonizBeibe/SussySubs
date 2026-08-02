@@ -1681,6 +1681,14 @@ public static partial class InitListViewAndEditBox
         {
             var colorButton = UiUtil.MakeButton(vm.ShowColorPickerCommand, IconNames.Palette, Se.Language.Main.ColorHint);
             buttonPanel.Children.Add(colorButton);
+
+            var posVisualButton = UiUtil.MakeButton(vm.ToggleVisualPosModeCommand, IconNames.Image, "Toggle visual pos mode");
+            posVisualButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay });
+            buttonPanel.Children.Add(posVisualButton);
+
+            var karaokeButton = UiUtil.MakeButton(vm.ToggleKaraokeModeCommand, IconNames.AccountVoice, "Toggle karaoke mode");
+            karaokeButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay });
+            buttonPanel.Children.Add(karaokeButton);
         }
 
         if (Se.Settings.Appearance.TextBoxShowButtonRemoveFormatting)

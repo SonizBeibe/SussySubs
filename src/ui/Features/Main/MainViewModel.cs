@@ -1031,6 +1031,7 @@ public partial class MainViewModel :
         _mpvReloader.Reset();
         _vlcReloader.Reset();
         _mpvPreviewDirty = true;
+        DrawVisualPosOverlay();
     }
 
     [RelayCommand]
@@ -10908,7 +10909,11 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(vm => vm.Initialize(Se.Settings.Tools.LastColorPickerColor.FromHexToColor()));
+        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(vm =>
+        {
+            vm.Initialize(Se.Settings.Tools.LastColorPickerColor.FromHexToColor());
+            vm.ShowAlpha = IsFormatAssa; // Make sure alpha channel is shown and enabled if it's ASS format
+        });
         if (!result.OkPressed)
         {
             return;
@@ -13229,7 +13234,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>();
+        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(vm =>
+        {
+            vm.ShowAlpha = IsFormatAssa;
+        });
         if (!result.OkPressed)
         {
             return;
@@ -21985,6 +21993,7 @@ public partial class MainViewModel :
         MakeSubtitleTextInfo(item.Text, item);
         MakeSubtitleTextInfoOriginal(item.OriginalText, item);
         _updateAudioVisualizer = true;
+        DrawVisualPosOverlay();
     }
 
     private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
@@ -24089,7 +24098,125 @@ public partial class MainViewModel :
     }
 
 
+
+
     private bool _isDraggingPos = false;
+    private bool _isVisualPosMode = false;
+    private bool _isKaraokeMode = false;
+
+    [RelayCommand]
+    private void ToggleVisualPosMode()
+    {
+        _isVisualPosMode = !_isVisualPosMode;
+        if (VideoPlayerControl != null)
+        {
+            VideoPlayerControl.ClickToTogglePlay = !_isVisualPosMode;
+            UpdateVisualPosOverlay();
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleKaraokeMode()
+    {
+        _isKaraokeMode = !_isKaraokeMode;
+        OnPropertyChanged(nameof(IsKaraokeMode));
+    }
+
+    public bool IsKaraokeMode => _isKaraokeMode;
+
+    private void UpdateVisualPosOverlay()
+    {
+        if (VideoPlayerControl == null) return;
+
+        var overlayGrid = VideoPlayerControl.VisualPosOverlayGrid;
+        if (overlayGrid == null) return;
+
+        overlayGrid.IsVisible = _isVisualPosMode;
+        if (!_isVisualPosMode)
+        {
+            overlayGrid.Children.Clear();
+            return;
+        }
+
+        DrawVisualPosOverlay();
+    }
+
+    private void DrawVisualPosOverlay()
+    {
+        if (VideoPlayerControl == null || !_isVisualPosMode) return;
+
+        var overlayGrid = VideoPlayerControl.VisualPosOverlayGrid;
+        if (overlayGrid == null) return;
+
+        overlayGrid.Children.Clear();
+
+        if (SelectedSubtitle == null || !IsFormatAssa) return;
+
+        var text = SelectedSubtitle.Text;
+        var match = System.Text.RegularExpressions.Regex.Match(text, @"\\pos\(([\d\.]+),([\d\.]+)\)");
+
+        if (!match.Success) return;
+
+        if (double.TryParse(match.Groups[1].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double x) &&
+            double.TryParse(match.Groups[2].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double y))
+        {
+            double vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
+            double vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
+
+            double cWidth = VideoPlayerControl.Bounds.Width;
+            double cHeight = VideoPlayerControl.Bounds.Height;
+
+            if (vidWidth == 0 || vidHeight == 0 || cWidth == 0 || cHeight == 0) return;
+
+            double scaleX = cWidth / vidWidth;
+            double scaleY = cHeight / vidHeight;
+            double minScale = System.Math.Min(scaleX, scaleY);
+
+            double actualWidth = vidWidth * minScale;
+            double actualHeight = vidHeight * minScale;
+
+            double offsetX = (cWidth - actualWidth) / 2.0;
+            double offsetY = (cHeight - actualHeight) / 2.0;
+
+            double displayX = offsetX + (x * minScale);
+            double displayY = offsetY + (y * minScale);
+
+            var lineH = new Avalonia.Controls.Shapes.Line
+            {
+                StartPoint = new Avalonia.Point(displayX - 10, displayY),
+                EndPoint = new Avalonia.Point(displayX + 10, displayY),
+                Stroke = Avalonia.Media.Brushes.Red,
+                StrokeThickness = 2,
+                IsHitTestVisible = false
+            };
+
+            var lineV = new Avalonia.Controls.Shapes.Line
+            {
+                StartPoint = new Avalonia.Point(displayX, displayY - 10),
+                EndPoint = new Avalonia.Point(displayX, displayY + 10),
+                Stroke = Avalonia.Media.Brushes.Red,
+                StrokeThickness = 2,
+                IsHitTestVisible = false
+            };
+
+            var box = new Avalonia.Controls.Shapes.Rectangle
+            {
+                Width = 20,
+                Height = 20,
+                Stroke = Avalonia.Media.Brushes.Red,
+                StrokeThickness = 2,
+                Fill = Avalonia.Media.Brushes.Transparent,
+                Margin = new Avalonia.Thickness(displayX - 10, displayY - 10, 0, 0),
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+                IsHitTestVisible = false
+            };
+
+            overlayGrid.Children.Add(lineH);
+            overlayGrid.Children.Add(lineV);
+            overlayGrid.Children.Add(box);
+        }
+    }
 
     internal void VideoPlayerAreaPointerPressed(Avalonia.Input.PointerPressedEventArgs e)
     {
@@ -24099,7 +24226,7 @@ public partial class MainViewModel :
             return;
         }
 
-        if (IsFormatAssa && SelectedSubtitle != null)
+        if (_isVisualPosMode && IsFormatAssa && SelectedSubtitle != null)
         {
             _isDraggingPos = true;
             UpdatePosFromEvent(e);
@@ -24108,7 +24235,7 @@ public partial class MainViewModel :
 
     internal void VideoPlayerAreaPointerMoved(Avalonia.Input.PointerEventArgs e)
     {
-        if (_isDraggingPos && IsFormatAssa && SelectedSubtitle != null)
+        if (_isVisualPosMode && _isDraggingPos && IsFormatAssa && SelectedSubtitle != null)
         {
             UpdatePosFromEvent(e);
         }
@@ -24116,7 +24243,7 @@ public partial class MainViewModel :
 
     internal void VideoPlayerAreaPointerReleased(Avalonia.Input.PointerReleasedEventArgs e)
     {
-        if (_isDraggingPos && IsFormatAssa && SelectedSubtitle != null)
+        if (_isVisualPosMode && _isDraggingPos && IsFormatAssa && SelectedSubtitle != null)
         {
             UpdatePosFromEvent(e);
             _isDraggingPos = false;
@@ -24126,31 +24253,42 @@ public partial class MainViewModel :
     private void UpdatePosFromEvent(Avalonia.Input.PointerEventArgs e)
     {
         if (VideoPlayerControl == null || SelectedSubtitle == null) return;
-        var point = e.GetPosition(VideoPlayerControl);
-
-        // Calculate coordinates based on video resolution (assumes 1920x1080 default, or you can extract from _mediaInfo)
+        var pos = e.GetPosition(VideoPlayerControl);
+        double cWidth = VideoPlayerControl.Bounds.Width;
+        double cHeight = VideoPlayerControl.Bounds.Height;
         double vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
         double vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
 
-        double cWidth = VideoPlayerControl.Bounds.Width;
-        double cHeight = VideoPlayerControl.Bounds.Height;
-
         if (cWidth == 0 || cHeight == 0) return;
 
-        int x = (int)(point.X * (vidWidth / cWidth));
-        int y = (int)(point.Y * (vidHeight / cHeight));
+        double scaleX = cWidth / vidWidth;
+        double scaleY = cHeight / vidHeight;
+        double minScale = System.Math.Min(scaleX, scaleY);
+        double actualWidth = vidWidth * minScale;
+        double actualHeight = vidHeight * minScale;
+        double offsetX = (cWidth - actualWidth) / 2.0;
+        double offsetY = (cHeight - actualHeight) / 2.0;
+
+        int x = (int)System.Math.Round((pos.X - offsetX) / minScale);
+        int y = (int)System.Math.Round((pos.Y - offsetY) / minScale);
 
         var text = SelectedSubtitle.Text;
-        if (text.Contains("\\pos("))
+        var match = System.Text.RegularExpressions.Regex.Match(text, @"\\pos\(([\d\.]+),([\d\.]+)\)");
+        if (match.Success)
         {
-            text = System.Text.RegularExpressions.Regex.Replace(text, @"\\pos\([^)]*\)", $"\\pos({x},{y})");
+            text = text.Remove(match.Index, match.Length).Insert(match.Index, $"\\pos({x},{y})");
         }
         else
         {
             text = $"{{\\pos({x},{y})}}" + text;
         }
         SelectedSubtitle.Text = text;
+
+        RefreshSubtitlePreview();
+        DrawVisualPosOverlay();
     }
+
+
 
 
     internal void ComboBoxSubtitleFormatPointerPressed(object? sender, PointerPressedEventArgs e)

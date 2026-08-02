@@ -48,6 +48,9 @@ public class AudioVisualizer : Control
     public static readonly StyledProperty<List<SubtitleLineViewModel>> AllSelectedParagraphsProperty =
         AvaloniaProperty.Register<AudioVisualizer, List<SubtitleLineViewModel>>(nameof(AllSelectedParagraphs));
 
+    public static readonly StyledProperty<bool> IsKaraokeModeProperty =
+        AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(IsKaraokeMode));
+
     public static readonly StyledProperty<Color> WaveformColorProperty =
         AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformColor));
 
@@ -121,6 +124,12 @@ public class AudioVisualizer : Control
     {
         get => GetValue(AllSelectedParagraphsProperty);
         set => SetValue(AllSelectedParagraphsProperty, value);
+    }
+
+    public bool IsKaraokeMode
+    {
+        get => GetValue(IsKaraokeModeProperty);
+        set => SetValue(IsKaraokeModeProperty, value);
     }
 
     public Color WaveformColor
@@ -378,6 +387,10 @@ public class AudioVisualizer : Control
     }
 
     private InteractionMode _interactionMode = InteractionMode.None;
+
+    private int _dragKaraokeIndex = -1;
+    private SubtitleLineViewModel? _dragKaraokeParagraph;
+    private List<System.Text.RegularExpressions.Match>? _dragKaraokeMatches;
 
     public readonly double ResizeMargin = 5.0; // Margin for resizing paragraphs
 
@@ -936,6 +949,10 @@ public class AudioVisualizer : Control
         _activeParagraph = null;
         _selectionMoveSnapshot.Clear();
 
+        _dragKaraokeParagraph = null;
+        _dragKaraokeIndex = -1;
+        _dragKaraokeMatches = null;
+
         InvalidateVisual();
     }
 
@@ -964,6 +981,19 @@ public class AudioVisualizer : Control
         {
             InvalidateVisual();
             return;
+        }
+
+        if (IsKaraokeMode)
+        {
+            // Check if we clicked on a karaoke divider
+            var hit = HitTestKaraokeDivider(point);
+            if (hit.Paragraph != null && hit.Index >= 0)
+            {
+                _dragKaraokeParagraph = hit.Paragraph;
+                _dragKaraokeIndex = hit.Index;
+                _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\{\\[kK][fo]?(\d+)\}").Cast<System.Text.RegularExpressions.Match>().ToList();
+                return;
+            }
         }
 
         // Refresh the hit-test from the actual press point. The cached hover state is set only on
@@ -1219,6 +1249,75 @@ public class AudioVisualizer : Control
                 _originalEndSeconds = _activeParagraph.EndTime.TotalSeconds;
                 _interactionMode = InteractionMode.ResizingRight;
             }
+        }
+        else if (IsKaraokeMode && _dragKaraokeParagraph != null && _dragKaraokeIndex >= 0 && _dragKaraokeMatches != null)
+        {
+            var text = _dragKaraokeParagraph.Text;
+            var match = _dragKaraokeMatches[_dragKaraokeIndex];
+
+            // Re-calculate the karaoke splits based on mouse position
+            double totalDurationMs = _dragKaraokeParagraph.Duration.TotalMilliseconds;
+            if (totalDurationMs > 0)
+            {
+                int sampleRate = WavePeaks != null ? WavePeaks.SampleRate : 48000;
+                double paragraphLeft = SecondsToXPositionOptimized(_dragKaraokeParagraph.StartTime.TotalSeconds - StartPositionSeconds, sampleRate, ZoomFactor);
+                double paragraphWidth = SecondsToXPositionOptimized(_dragKaraokeParagraph.EndTime.TotalSeconds - StartPositionSeconds, sampleRate, ZoomFactor) - paragraphLeft;
+
+                var pos = e.GetPosition(this);
+                double ratio = (pos.X - paragraphLeft) / paragraphWidth;
+                ratio = System.Math.Max(0.0, System.Math.Min(1.0, ratio));
+                double targetMs = ratio * totalDurationMs;
+
+                // Calculate the time up to the previous syllable
+                double previousTimeMs = 0;
+                for (int i = 0; i < _dragKaraokeIndex; i++)
+                {
+                    if (int.TryParse(_dragKaraokeMatches[i].Groups[1].Value, out int kdur))
+                    {
+                        previousTimeMs += kdur * 10.0;
+                    }
+                }
+
+                // We need to adjust current syllable and the next one (if any)
+                double newCurrentDurMs = targetMs - previousTimeMs;
+                if (newCurrentDurMs < 0) newCurrentDurMs = 0;
+
+                int newCurrentK = (int)System.Math.Round(newCurrentDurMs / 10.0);
+
+                if (_dragKaraokeIndex + 1 < _dragKaraokeMatches.Count)
+                {
+                    double nextTimeMs = 0;
+                    if (int.TryParse(_dragKaraokeMatches[_dragKaraokeIndex + 1].Groups[1].Value, out int nkdur))
+                    {
+                        nextTimeMs = nkdur * 10.0;
+                    }
+
+                    double totalTwoSyllablesMs = (int.Parse(match.Groups[1].Value) * 10.0) + nextTimeMs;
+                    double newNextDurMs = totalTwoSyllablesMs - newCurrentDurMs;
+                    if (newNextDurMs < 0) newNextDurMs = 0;
+
+                    int newNextK = (int)System.Math.Round(newNextDurMs / 10.0);
+
+                    // Apply changes
+                    var currentTag = match.Groups[0].Value;
+                    var nextMatch = _dragKaraokeMatches[_dragKaraokeIndex + 1];
+                    var nextTag = nextMatch.Groups[0].Value;
+
+                    var newCurrentTag = "{\\k" + newCurrentK + "}";
+                    var newNextTag = "{\\k" + newNextK + "}";
+
+                    // We must rebuild text string
+                    var newText = text;
+                    newText = newText.Remove(nextMatch.Index, nextMatch.Length).Insert(nextMatch.Index, newNextTag);
+                    newText = newText.Remove(match.Index, match.Length).Insert(match.Index, newCurrentTag);
+
+                    _dragKaraokeParagraph.Text = newText;
+
+                    // Update matches
+                    _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\{\\[kK][fo]?(\d+)\}").Cast<System.Text.RegularExpressions.Match>().ToList();
+                }
+            }
+            InvalidateVisual();
         }
         else if (_interactionMode == InteractionMode.ResizingRightOr && _activeParagraphNext != null)
         {
@@ -1573,6 +1672,16 @@ public class AudioVisualizer : Control
 
     private void UpdateCursor(Point point)
     {
+        if (IsKaraokeMode)
+        {
+            var hit = HitTestKaraokeDivider(point);
+            if (hit.Paragraph != null && hit.Index >= 0)
+            {
+                Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.SizeWestEast);
+                return;
+            }
+        }
+
         var p = HitTestParagraph(point);
         _cachedHitParagraph = p;
         _cachedIsNearLeftEdge = false;
@@ -2926,6 +3035,44 @@ public class AudioVisualizer : Control
 
             DrawParagraphFooter(context, paragraph, currentRegionLeft, currentRegionWidth, height, ref renderCtx);
         }
+
+        // Karaoke dividers
+        if (IsKaraokeMode && (paragraph.Text.Contains("{\\k") || paragraph.Text.Contains("{\\K") || paragraph.Text.Contains("{\\kf") || paragraph.Text.Contains("{\\ko")))
+        {
+            DrawKaraokeDividers(context, paragraph, currentRegionLeft, currentRegionWidth, height, ref renderCtx);
+        }
+    }
+
+    private void DrawKaraokeDividers(DrawingContext context, SubtitleLineViewModel paragraph, double currentRegionLeft, double currentRegionWidth, double height, ref RenderContext renderCtx)
+    {
+        var durationMs = paragraph.Duration.TotalMilliseconds;
+        if (durationMs <= 0) return;
+
+        var text = paragraph.Text;
+        int idx = 0;
+        double currentTime = 0;
+
+        var pen = new Pen(Brushes.Yellow, 2) { DashStyle = DashStyle.Dash };
+
+        while ((idx = text.IndexOf("{\\", idx)) >= 0)
+        {
+            int endIdx = text.IndexOf('}', idx);
+            if (endIdx < 0) break;
+
+            var tag = text.Substring(idx, endIdx - idx + 1);
+            var match = System.Text.RegularExpressions.Regex.Match(tag, @"\{\\[kK][fo]?(\d+)\}");
+            if (match.Success)
+            {
+                int duration10ms = int.Parse(match.Groups[1].Value);
+                double timeMs = duration10ms * 10.0;
+                currentTime += timeMs;
+
+                double x = currentRegionLeft + (currentTime / durationMs) * currentRegionWidth;
+                context.DrawLine(pen, new Point(x, 0), new Point(x, height));
+            }
+
+            idx = endIdx + 1;
+        }
     }
 
     // SE 4 parity: small footer at the bottom-left of each paragraph rectangle with
@@ -3829,5 +3976,43 @@ public class AudioVisualizer : Control
     internal void UpdateTheme()
     {
         //_paintTimeText = UiUtil.GetTextColor();
+    }
+
+
+    private (SubtitleLineViewModel? Paragraph, int Index) HitTestKaraokeDivider(Point point)
+    {
+        if (_displayableParagraphs == null) return (null, -1);
+
+        foreach (var p in _displayableParagraphs)
+        {
+            if (p.EndTime.TotalSeconds < StartPositionSeconds || p.StartTime.TotalSeconds > EndPositionSeconds) continue;
+
+            var durationMs = p.Duration.TotalMilliseconds;
+            if (durationMs <= 0) continue;
+
+            var matches = System.Text.RegularExpressions.Regex.Matches(p.Text, @"\{\\[kK][fo]?(\d+)\}");
+            if (matches.Count == 0) continue;
+
+            int sampleRate = WavePeaks != null ? WavePeaks.SampleRate : 48000;
+            double pLeft = SecondsToXPositionOptimized(p.StartTime.TotalSeconds - StartPositionSeconds, sampleRate, ZoomFactor);
+            double pWidth = SecondsToXPositionOptimized(p.EndTime.TotalSeconds - StartPositionSeconds, sampleRate, ZoomFactor) - pLeft;
+
+            double currentTimeMs = 0;
+            for (int i = 0; i < matches.Count; i++)
+            {
+                if (int.TryParse(matches[i].Groups[1].Value, out int kdur))
+                {
+                    currentTimeMs += kdur * 10.0;
+                    double x = pLeft + (currentTimeMs / durationMs) * pWidth;
+
+                    if (System.Math.Abs(point.X - x) < 5.0)
+                    {
+                        return (p, i);
+                    }
+                }
+            }
+        }
+
+        return (null, -1);
     }
 }
