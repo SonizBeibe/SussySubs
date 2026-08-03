@@ -1274,12 +1274,6 @@ public static partial class InitListViewAndEditBox
             FontWeight = FontWeight.Bold,
         }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
         panelStyle.Children.Add(labelStyle);
-        var comboStyleContainer = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 5,
-            HorizontalAlignment = HorizontalAlignment.Stretch
-        };
         var comboStyle = new ComboBox
         {
             DataContext = vm,
@@ -1290,14 +1284,7 @@ public static partial class InitListViewAndEditBox
                 Mode = BindingMode.TwoWay
             }
         };
-        comboStyleContainer.Children.Add(comboStyle);
-        var buttonStyleManager = new Button
-        {
-            Content = "Gestor de Estilos",
-            Command = vm.ShowAssaStylesCommand
-        };
-        comboStyleContainer.Children.Add(buttonStyleManager);
-        panelStyle.Children.Add(comboStyleContainer);
+        panelStyle.Children.Add(comboStyle);
         timeControlsPanel.Children.Add(panelStyle);
 
         // Effect display
@@ -1457,6 +1444,8 @@ public static partial class InitListViewAndEditBox
         formatToolbar.Children.Add(new Button { Content = "\\2c", Command = vm.TextBoxColor2Command });
         formatToolbar.Children.Add(new Button { Content = "\\3c", Command = vm.TextBoxColor3Command });
         formatToolbar.Children.Add(new Button { Content = "\\4c", Command = vm.TextBoxColor4Command });
+
+        formatToolbar.Children.Add(new Button { Content = "Gestor de Estilos", Command = vm.ShowAssaStylesCommand, Margin = new Thickness(5, 0, 0, 0) });
 
         var editorContainer = new Grid
         {
