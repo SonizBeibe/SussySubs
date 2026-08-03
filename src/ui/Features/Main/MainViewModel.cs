@@ -13226,6 +13226,63 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void TextBoxStrikeThrough()
+    {
+        var tb = EditTextBox;
+        ToggleTextBoxTag(tb, "s");
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void TextBoxColor1()
+    {
+        var tb = EditTextBox;
+        if (tb == null) return;
+        InsertAssaTag(tb, "\\1c");
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void TextBoxColor2()
+    {
+        var tb = EditTextBox;
+        if (tb == null) return;
+        InsertAssaTag(tb, "\\2c");
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void TextBoxColor3()
+    {
+        var tb = EditTextBox;
+        if (tb == null) return;
+        InsertAssaTag(tb, "\\3c");
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void TextBoxColor4()
+    {
+        var tb = EditTextBox;
+        if (tb == null) return;
+        InsertAssaTag(tb, "\\4c");
+        _updateAudioVisualizer = true;
+    }
+
+    private void InsertAssaTag(ITextBoxWrapper tb, string tagPrefix)
+    {
+        if (tb.Text == null)
+            tb.Text = "";
+
+        var selStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
+        var tag = $"{{{tagPrefix}&H0000FF&}}"; // Default red just to insert something, user will edit it
+        tb.Text = tb.Text.Insert(selStart, tag);
+        tb.SelectionStart = selStart + tagPrefix.Length + 1;
+        tb.SelectionEnd = tb.SelectionStart + 8;
+        tb.Focus();
+    }
+
+    [RelayCommand]
     private async Task TextBoxColor()
     {
         var tb = EditTextBox;
