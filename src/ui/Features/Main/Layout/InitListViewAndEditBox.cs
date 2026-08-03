@@ -54,7 +54,7 @@ public static partial class InitListViewAndEditBox
 
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("*,Auto"),
+            RowDefinitions = new RowDefinitions("*,Auto,Auto"),
         };
 
         // TableView (Avalonia 12.1) pilot #3, after Show history (#12704) and the OCR grid
@@ -1775,6 +1775,34 @@ public static partial class InitListViewAndEditBox
         Grid.SetRow(editGrid, 1);
         mainGrid.Children.Add(editGrid);
 
+        // K-timing Panel
+        var karaokePanel = new Grid
+        {
+            Margin = new Thickness(10, 0, 10, 10),
+            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.OneWay }
+        };
+
+        var tagComboBox = new ComboBox
+        {
+            ItemsSource = new[] { "\\k", "\\kf", "\\ko" },
+            SelectedIndex = 0,
+            Margin = new Thickness(0, 0, 10, 0),
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        karaokePanel.Children.Add(tagComboBox);
+
+        var karaokeBarControl = new KaraokeBarControl
+        {
+            MinHeight = 40,
+            Background = new SolidColorBrush(Color.Parse("#22888888")), // Slight background to see it
+            Margin = new Thickness(0)
+        };
+        Grid.SetColumn(karaokeBarControl, 1);
+        karaokePanel.Children.Add(karaokeBarControl);
+
+        Grid.SetRow(karaokePanel, 2);
+        mainGrid.Children.Add(karaokePanel);
 
         textEditGrid.ColumnDefinitions[1].Bind(ColumnDefinition.WidthProperty, new Binding(nameof(vm.ShowColumnOriginalText))
         {

@@ -289,6 +289,11 @@ public static class InitMenu
                             Header = "WebVTT png",
                             Command = vm.ExportWebVttThumbnailsCommand,
                         },
+                        new MenuItem
+                        {
+                            Header = "Exportar como YTT...",
+                            Command = vm.ExportYttCommand,
+                        },
                         new Separator(),
                         new MenuItem
                         {
