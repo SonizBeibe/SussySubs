@@ -1004,7 +1004,7 @@ public class AudioVisualizer : Control
         UpdateCursor(point);
 
         var p = _cachedHitParagraph;
-        if (IsKaraokeMode && p != null && (AllSelectedParagraphs == null || !AllSelectedParagraphs.Contains(p)))
+        if (IsKaraokeMode && (p == null || AllSelectedParagraphs == null || !AllSelectedParagraphs.Contains(p)))
         {
             return;
         }
@@ -3461,52 +3461,6 @@ public class AudioVisualizer : Control
                 return;
             }
 
-            const double additionalSeconds = 15.0;
-            var startThreshold = (StartPositionSeconds - additionalSeconds) * TimeCode.BaseUnit;
-            var endThreshold = (EndPositionSeconds + additionalSeconds) * TimeCode.BaseUnit;
-            var maxTime = TimeCode.MaxTimeTotalMilliseconds;
-
-            // 1. Use Binary Search to find the first potential subtitle in the time range O(log N)
-            var startIndex = FindFirstIndexAfterTime(subtitle, startThreshold);
-
-            var lastStartTime = -1d;
-            var count = 0;
-
-            // 2. Linear scan only the relevant window
-            for (var i = startIndex; i < subtitle.Count; i++)
-            {
-                var p = subtitle[i];
-                var pStart = p.StartTime.TotalMilliseconds;
-
-                // Since it's sorted, if we exceed the end threshold or max time, we can stop entirely
-                if (pStart > endThreshold || pStart >= maxTime)
-                {
-                    break;
-                }
-
-                // Skip subtitles that end before our window starts
-                if (p.EndTime.TotalMilliseconds < startThreshold)
-                {
-                    continue;
-                }
-
-                // 3. Apply filtering logic immediately to avoid second loop
-                var isTooShortOrDense = count > 200 && (p.Duration.TotalMilliseconds < 0.01 || pStart - lastStartTime < 90);
-
-                if (!isTooShortOrDense)
-                {
-                    _displayableParagraphs.Add(p);
-                    lastStartTime = pStart;
-                    count++;
-                }
-
-                if (count >= 250)
-                {
-                    break;
-                }
-            }
-
-            // 4. Optimized Selection Handling
             var primaryParagraph = (primarySelectedIndex >= 0 && primarySelectedIndex < subtitle.Count)
                 ? subtitle[primarySelectedIndex]
                 : null;
@@ -3515,6 +3469,7 @@ public class AudioVisualizer : Control
             {
                 SelectedParagraph = primaryParagraph;
                 AllSelectedParagraphs.Add(primaryParagraph);
+                _displayableParagraphs.Add(primaryParagraph);
             }
 
             foreach (var p in selectedIndexes)
@@ -3522,6 +3477,10 @@ public class AudioVisualizer : Control
                 if (p != null && !p.StartTime.IsMaxTime() && p != primaryParagraph)
                 {
                     AllSelectedParagraphs.Add(p);
+                    if (!_displayableParagraphs.Contains(p))
+                    {
+                        _displayableParagraphs.Add(p);
+                    }
                 }
             }
         }
