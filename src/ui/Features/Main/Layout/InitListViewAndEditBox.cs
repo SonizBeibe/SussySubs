@@ -1447,6 +1447,39 @@ public static partial class InitListViewAndEditBox
 
         formatToolbar.Children.Add(new Button { Content = "Gestor de Estilos", Command = vm.ShowAssaStylesCommand, Margin = new Thickness(5, 0, 0, 0) });
 
+        var buttonEffects = new Button { Content = "Efectos", Margin = new Thickness(5, 0, 0, 0) };
+        var flyoutEffects = new MenuFlyout();
+        var luaService = new Nikse.SubtitleEdit.Logic.Automation.LuaAutomationService();
+
+        buttonEffects.Click += (s, e) =>
+        {
+            flyoutEffects.Items.Clear();
+            var macros = luaService.ScanForMacros();
+
+            if (macros.Count == 0)
+            {
+                var emptyItem = new MenuItem { Header = "No se encontraron macros" };
+                emptyItem.IsEnabled = false;
+                flyoutEffects.Items.Add(emptyItem);
+            }
+            else
+            {
+                foreach (var macro in macros)
+                {
+                    var item = new MenuItem { Header = macro.Name };
+                    var m = macro; // Capture variable
+                    item.Click += (sender, args) =>
+                    {
+                        // In the future pass subtitles, for now pass null
+                        luaService.ExecuteMacro(m.FilePath, null);
+                    };
+                    flyoutEffects.Items.Add(item);
+                }
+            }
+            flyoutEffects.ShowAt(buttonEffects);
+        };
+        formatToolbar.Children.Add(buttonEffects);
+
         var editorContainer = new Grid
         {
             RowDefinitions = new RowDefinitions("Auto,*"),
