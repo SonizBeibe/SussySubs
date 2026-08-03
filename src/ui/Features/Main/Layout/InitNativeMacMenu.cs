@@ -246,6 +246,7 @@ public static class InitNativeMacMenu
         exportItems.Items.Add(Item(new PacUnicode().Name, v => v.ExportPacUnicodeCommand));
         exportItems.Items.Add(Item(lExport.TitleExportVobSub, v => v.ExportVobSubCommand));
         exportItems.Items.Add(Item("WebVTT png", v => v.ExportWebVttThumbnailsCommand));
+        exportItems.Items.Add(Item("Exportar como YTT...", v => v.ExportYttCommand));
         exportItems.Items.Add(new NativeMenuItemSeparator());
         exportItems.Items.Add(Item(Clean(lExport.CustomTextFormatsDotDotDot), v => v.ShowExportCustomTextFormatCommand));
         exportItems.Items.Add(Item(Clean(lExport.PlainTextDotDotDot), v => v.ShowExportPlainTextCommand));

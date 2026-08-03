@@ -2441,9 +2441,9 @@ public partial class MainViewModel :
             Se.Settings.File.DCinemaSmpte.CurrentDCinemaStartTime = Configuration.Settings.SubtitleSettings.CurrentDCinemaStartTime;
             Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontId = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontId;
             Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontUri = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontUri;
-            Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontColor = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontColor.ToHex();
+            Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontColor = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontColor.ToHex(true);
             Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontEffect = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontEffect;
-            Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontEffectColor = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontEffectColor.ToHex();
+            Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontEffectColor = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontEffectColor.ToHex(true);
             Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontSize = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontSize;
 
             var result = await ShowDialogAsync<DCinemaSmptePropertiesWindow, DCinemaSmptePropertiesViewModel>(vm => { vm.Initialize(GetUpdateSubtitle(), format); });
@@ -13278,7 +13278,7 @@ public partial class MainViewModel :
         }
 
         // Save last used color
-        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.ToHex();
+        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.FromColorToHex();
 
         // 1. Convert to ASS color format
         // In Avalonia Color, R and B are swapped compared to ASS BGR format
@@ -13314,7 +13314,7 @@ public partial class MainViewModel :
         }
 
         // Save last used color
-        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.ToHex();
+        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.FromColorToHex();
 
         // 1. Convert to ASS color format
         // In Avalonia Color, R and B are swapped compared to ASS BGR format
@@ -13350,7 +13350,7 @@ public partial class MainViewModel :
         }
 
         // Save last used color
-        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.ToHex();
+        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.FromColorToHex();
 
         // 1. Convert to ASS color format
         // In Avalonia Color, R and B are swapped compared to ASS BGR format
@@ -13386,7 +13386,7 @@ public partial class MainViewModel :
         }
 
         // Save last used color
-        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.ToHex();
+        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.FromColorToHex();
 
         // 1. Convert to ASS color format
         // In Avalonia Color, R and B are swapped compared to ASS BGR format
