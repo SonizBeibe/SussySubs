@@ -13205,7 +13205,14 @@ public partial class MainViewModel :
     private void TextBoxBold()
     {
         var tb = EditTextBox;
-        ToggleTextBoxTag(tb, "b");
+        if (SelectedSubtitleFormat is AdvancedSubStationAlpha)
+        {
+            ToggleSmartAssaTag(tb, "b");
+        }
+        else
+        {
+            ToggleTextBoxTag(tb, "b");
+        }
         _updateAudioVisualizer = true;
     }
 
@@ -13213,7 +13220,14 @@ public partial class MainViewModel :
     private void TextBoxItalic()
     {
         var tb = EditTextBox;
-        ToggleTextBoxTag(tb, "i");
+        if (SelectedSubtitleFormat is AdvancedSubStationAlpha)
+        {
+            ToggleSmartAssaTag(tb, "i");
+        }
+        else
+        {
+            ToggleTextBoxTag(tb, "i");
+        }
         _updateAudioVisualizer = true;
     }
 
@@ -13221,7 +13235,14 @@ public partial class MainViewModel :
     private void TextBoxUnderline()
     {
         var tb = EditTextBox;
-        ToggleTextBoxTag(tb, "u");
+        if (SelectedSubtitleFormat is AdvancedSubStationAlpha)
+        {
+            ToggleSmartAssaTag(tb, "u");
+        }
+        else
+        {
+            ToggleTextBoxTag(tb, "u");
+        }
         _updateAudioVisualizer = true;
     }
 
@@ -13229,57 +13250,276 @@ public partial class MainViewModel :
     private void TextBoxStrikeThrough()
     {
         var tb = EditTextBox;
-        ToggleTextBoxTag(tb, "s");
+        if (SelectedSubtitleFormat is AdvancedSubStationAlpha)
+        {
+            ToggleSmartAssaTag(tb, "s");
+        }
+        else
+        {
+            ToggleTextBoxTag(tb, "s");
+        }
         _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
-    private void TextBoxColor1()
+    private async Task TextBoxColor1()
     {
         var tb = EditTextBox;
         if (tb == null) return;
-        InsertAssaTag(tb, "\\1c");
+
+        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(vm =>
+        {
+            vm.Initialize(Se.Settings.Tools.LastColorPickerColor.FromHexToColor());
+            vm.ShowAlpha = true;
+        });
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Save last used color
+        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.ToHex();
+
+        // 1. Convert to ASS color format
+        // In Avalonia Color, R and B are swapped compared to ASS BGR format
+        var c = result.SelectedColor;
+        var assColor = $"&H{c.B:X2}{c.G:X2}{c.R:X2}&";
+
+        SmartInjectAssaTag(tb, "\\1c", assColor);
+
+        // 2. Handle Alpha ONLY IF it's not 255 (not fully opaque).
+        if (c.A != 255)
+        {
+            var assAlpha = $"&H{255 - c.A:X2}&";
+            SmartInjectAssaTag(tb, "\\1a", assAlpha);
+        }
+
         _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
-    private void TextBoxColor2()
+    private async Task TextBoxColor2()
     {
         var tb = EditTextBox;
         if (tb == null) return;
-        InsertAssaTag(tb, "\\2c");
+
+        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(vm =>
+        {
+            vm.Initialize(Se.Settings.Tools.LastColorPickerColor.FromHexToColor());
+            vm.ShowAlpha = true;
+        });
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Save last used color
+        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.ToHex();
+
+        // 1. Convert to ASS color format
+        // In Avalonia Color, R and B are swapped compared to ASS BGR format
+        var c = result.SelectedColor;
+        var assColor = $"&H{c.B:X2}{c.G:X2}{c.R:X2}&";
+
+        SmartInjectAssaTag(tb, "\\2c", assColor);
+
+        // 2. Handle Alpha ONLY IF it's not 255 (not fully opaque).
+        if (c.A != 255)
+        {
+            var assAlpha = $"&H{255 - c.A:X2}&";
+            SmartInjectAssaTag(tb, "\\2a", assAlpha);
+        }
+
         _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
-    private void TextBoxColor3()
+    private async Task TextBoxColor3()
     {
         var tb = EditTextBox;
         if (tb == null) return;
-        InsertAssaTag(tb, "\\3c");
+
+        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(vm =>
+        {
+            vm.Initialize(Se.Settings.Tools.LastColorPickerColor.FromHexToColor());
+            vm.ShowAlpha = true;
+        });
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Save last used color
+        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.ToHex();
+
+        // 1. Convert to ASS color format
+        // In Avalonia Color, R and B are swapped compared to ASS BGR format
+        var c = result.SelectedColor;
+        var assColor = $"&H{c.B:X2}{c.G:X2}{c.R:X2}&";
+
+        SmartInjectAssaTag(tb, "\\3c", assColor);
+
+        // 2. Handle Alpha ONLY IF it's not 255 (not fully opaque).
+        if (c.A != 255)
+        {
+            var assAlpha = $"&H{255 - c.A:X2}&";
+            SmartInjectAssaTag(tb, "\\3a", assAlpha);
+        }
+
         _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
-    private void TextBoxColor4()
+    private async Task TextBoxColor4()
     {
         var tb = EditTextBox;
         if (tb == null) return;
-        InsertAssaTag(tb, "\\4c");
+
+        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(vm =>
+        {
+            vm.Initialize(Se.Settings.Tools.LastColorPickerColor.FromHexToColor());
+            vm.ShowAlpha = true;
+        });
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Save last used color
+        Se.Settings.Tools.LastColorPickerColor = result.SelectedColor.ToHex();
+
+        // 1. Convert to ASS color format
+        // In Avalonia Color, R and B are swapped compared to ASS BGR format
+        var c = result.SelectedColor;
+        var assColor = $"&H{c.B:X2}{c.G:X2}{c.R:X2}&";
+
+        SmartInjectAssaTag(tb, "\\4c", assColor);
+
+        // 2. Handle Alpha ONLY IF it's not 255 (not fully opaque).
+        if (c.A != 255)
+        {
+            var assAlpha = $"&H{255 - c.A:X2}&";
+            SmartInjectAssaTag(tb, "\\4a", assAlpha);
+        }
+
         _updateAudioVisualizer = true;
     }
 
-    private void InsertAssaTag(ITextBoxWrapper tb, string tagPrefix)
-    {
-        if (tb.Text == null)
-            tb.Text = "";
 
-        var selStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
-        var tag = $"{{{tagPrefix}&H0000FF&}}"; // Default red just to insert something, user will edit it
-        tb.Text = tb.Text.Insert(selStart, tag);
-        tb.SelectionStart = selStart + tagPrefix.Length + 1;
-        tb.SelectionEnd = tb.SelectionStart + 8;
+    private void SmartInjectAssaTag(ITextBoxWrapper tb, string tagPrefix, string tagValue)
+    {
+        if (tb.Text == null) tb.Text = "";
+
+        var text = tb.Text;
+        var caret = tb.SelectionStart;
+
+        int openBrace = -1;
+        int closeBrace = -1;
+
+        for (int i = caret - 1; i >= 0; i--)
+        {
+            if (text[i] == '}') break;
+            if (text[i] == '{')
+            {
+                openBrace = i;
+                break;
+            }
+        }
+
+        if (openBrace != -1)
+        {
+            closeBrace = text.IndexOf('}', openBrace);
+        }
+
+        if (openBrace == -1 && caret > 0 && text[caret - 1] == '}')
+        {
+            closeBrace = caret - 1;
+            for (int i = closeBrace - 1; i >= 0; i--)
+            {
+                if (text[i] == '{')
+                {
+                    openBrace = i;
+                    break;
+                }
+            }
+        }
+
+        if (openBrace == -1 && caret < text.Length && text[caret] == '{')
+        {
+            openBrace = caret;
+            closeBrace = text.IndexOf('}', openBrace);
+        }
+
+        if (openBrace != -1 && closeBrace != -1 && caret >= openBrace && caret <= closeBrace + 1)
+        {
+            var blockContent = text.Substring(openBrace + 1, closeBrace - openBrace - 1);
+
+            int tagIdx = blockContent.IndexOf(tagPrefix);
+            if (tagIdx != -1)
+            {
+                int endIdx = blockContent.IndexOf('\\', tagIdx + 1);
+                if (endIdx == -1) endIdx = blockContent.Length;
+
+                string newBlockContent = blockContent.Substring(0, tagIdx) + tagPrefix + tagValue + blockContent.Substring(endIdx);
+
+                tb.Text = text.Substring(0, openBrace + 1) + newBlockContent + text.Substring(closeBrace);
+                tb.SelectionStart = openBrace + 1 + tagIdx + tagPrefix.Length + tagValue.Length;
+                tb.SelectionEnd = tb.SelectionStart;
+            }
+            else
+            {
+                string newBlockContent = blockContent + tagPrefix + tagValue;
+                tb.Text = text.Substring(0, openBrace + 1) + newBlockContent + text.Substring(closeBrace);
+                tb.SelectionStart = closeBrace + tagPrefix.Length + tagValue.Length;
+                tb.SelectionEnd = tb.SelectionStart;
+            }
+        }
+        else
+        {
+            var tag = $"{{{tagPrefix}{tagValue}}}";
+            tb.Text = text.Insert(caret, tag);
+            tb.SelectionStart = caret + tag.Length;
+            tb.SelectionEnd = tb.SelectionStart;
+        }
         tb.Focus();
+    }
+
+    private void ToggleSmartAssaTag(ITextBoxWrapper tb, string tagLetter)
+    {
+        if (tb.Text == null) tb.Text = "";
+
+        var text = tb.Text;
+        var caret = tb.SelectionStart;
+
+        bool isCurrentlyActive = false;
+
+        int openBraceIdx = -1;
+        for (int i = caret - 1; i >= 0; i--)
+        {
+            if (text[i] == '{')
+            {
+                openBraceIdx = i;
+                int closeBraceIdx = text.IndexOf('}', openBraceIdx);
+                if (closeBraceIdx != -1)
+                {
+                    string block = text.Substring(openBraceIdx + 1, closeBraceIdx - openBraceIdx - 1);
+                    int tagIdx = block.LastIndexOf("\\" + tagLetter);
+                    if (tagIdx != -1)
+                    {
+                        if (tagIdx + 1 + tagLetter.Length < block.Length)
+                        {
+                            char valChar = block[tagIdx + 1 + tagLetter.Length];
+                            if (valChar == '1') isCurrentlyActive = true;
+                            else if (valChar == '0') isCurrentlyActive = false;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        string newTagValue = isCurrentlyActive ? "0" : "1";
+        SmartInjectAssaTag(tb, "\\" + tagLetter, newTagValue);
     }
 
     [RelayCommand]

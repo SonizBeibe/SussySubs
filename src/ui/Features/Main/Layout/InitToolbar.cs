@@ -336,15 +336,6 @@ public static class InitToolbar
             isLastSeparator = false;
         }
 
-        stackPanelLeft.Children.Add(new CheckBox
-        {
-            Content = "Auto-generar YTT/SRV3 (requiere ytsubconverter.exe)",
-            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.AutoGenerateYtt)),
-            DataContext = vm,
-            Margin = new Thickness(15, 0, 0, 0),
-            VerticalAlignment = VerticalAlignment.Center,
-        });
-
         var stackPanelRight = new StackPanel
         {
             Orientation = Orientation.Horizontal,
