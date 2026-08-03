@@ -1274,6 +1274,12 @@ public static partial class InitListViewAndEditBox
             FontWeight = FontWeight.Bold,
         }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
         panelStyle.Children.Add(labelStyle);
+        var comboStyleContainer = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         var comboStyle = new ComboBox
         {
             DataContext = vm,
@@ -1284,7 +1290,14 @@ public static partial class InitListViewAndEditBox
                 Mode = BindingMode.TwoWay
             }
         };
-        panelStyle.Children.Add(comboStyle);
+        comboStyleContainer.Children.Add(comboStyle);
+        var buttonStyleManager = new Button
+        {
+            Content = "Gestor de Estilos",
+            Command = vm.ShowAssaStylesCommand
+        };
+        comboStyleContainer.Children.Add(buttonStyleManager);
+        panelStyle.Children.Add(comboStyleContainer);
         timeControlsPanel.Children.Add(panelStyle);
 
         // Effect display
@@ -1427,10 +1440,39 @@ public static partial class InitListViewAndEditBox
             Mode = BindingMode.OneWay
         });
         textEditGrid.Children.Add(textCharsSecLabel);
-        var textEditor = MakeTextBox(vm);
 
-        textEditGrid.Children.Add(textEditor);
+        var formatToolbar = new WrapPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 0, 0, 5),
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.HasFormatStyle))
+        };
+
+        formatToolbar.Children.Add(new Button { Content = "Negrita", Command = vm.TextBoxBoldCommand });
+        formatToolbar.Children.Add(new Button { Content = "Cursiva", Command = vm.TextBoxItalicCommand });
+        formatToolbar.Children.Add(new Button { Content = "Subrayado", Command = vm.TextBoxUnderlineCommand });
+        formatToolbar.Children.Add(new Button { Content = "Tachado", Command = vm.TextBoxStrikeThroughCommand });
+
+        formatToolbar.Children.Add(new Button { Content = "\\1c", Command = vm.TextBoxColor1Command });
+        formatToolbar.Children.Add(new Button { Content = "\\2c", Command = vm.TextBoxColor2Command });
+        formatToolbar.Children.Add(new Button { Content = "\\3c", Command = vm.TextBoxColor3Command });
+        formatToolbar.Children.Add(new Button { Content = "\\4c", Command = vm.TextBoxColor4Command });
+
+        var editorContainer = new Grid
+        {
+            RowDefinitions = new RowDefinitions("Auto,*"),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch
+        };
+        editorContainer.Children.Add(formatToolbar);
+        Grid.SetRow(formatToolbar, 0);
+
+        var textEditor = MakeTextBox(vm);
+        editorContainer.Children.Add(textEditor);
         Grid.SetRow(textEditor, 1);
+
+        textEditGrid.Children.Add(editorContainer);
+        Grid.SetRow(editorContainer, 1);
 
         var textTotalLengthLabel = new TextBlock
         {

@@ -11,25 +11,33 @@ public static class SubtitleFormatHelper
 
     public static List<SubtitleFormat> GetSubtitleFormatsWithFavoritesAtTop()
     {
-        var list = SubtitleFormat.AllSubtitleFormats.ToList();
-        var defaultFormat = Se.Settings.General.DefaultSubtitleFormat;
-        var favorites = Se.Settings.General.FavoriteSubtitleFormats.Split([';'], StringSplitOptions.RemoveEmptyEntries);
-
+        var allFormats = SubtitleFormat.AllSubtitleFormats;
         var result = new List<SubtitleFormat>();
 
-        // Add favorites in order (keeping the order from settings)
-        foreach (var favorite in favorites)
+        var allowedNames = new[]
         {
-            var favoriteFormat = list.FirstOrDefault(f => f.FriendlyName == favorite);
-            if (favoriteFormat != null)
+            "Advanced Sub Station Alpha",
+            "SubRip",
+            "YouTube SBV",
+            "Adobe After Effects"
+        };
+
+        var allowedTypes = new[]
+        {
+            typeof(Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha),
+            typeof(Nikse.SubtitleEdit.Core.SubtitleFormats.SubRip),
+            typeof(Nikse.SubtitleEdit.Core.SubtitleFormats.YouTubeSbv),
+            typeof(Nikse.SubtitleEdit.Core.SubtitleFormats.AdobeAfterEffectsFTME)
+        };
+
+        foreach (var allowedType in allowedTypes)
+        {
+            var format = allFormats.FirstOrDefault(f => f.GetType() == allowedType);
+            if (format != null)
             {
-                result.Add(favoriteFormat);
-                list.Remove(favoriteFormat);
+                result.Add(format);
             }
         }
-
-        // Add remaining formats
-        result.AddRange(list);
 
         return result;
     }
