@@ -72,7 +72,7 @@ public class KaraokeBarControl : Grid
 
                 int currentStringIndex = start;
                 int currentMatchIndex = i;
-                border.PointerPressed += (s, e) => OnSyllableClicked(currentStringIndex, rawSyllableText, currentMatchIndex);
+                border.PointerPressed += (s, e) => OnSyllableClicked(currentStringIndex, rawSyllableText, currentMatchIndex, e, border);
                 _panel.Children.Add(border);
             }
 
@@ -94,7 +94,7 @@ public class KaraokeBarControl : Grid
         }
     }
 
-    private void OnSyllableClicked(int startIdx, string text, int matchIndex)
+    private void OnSyllableClicked(int startIdx, string text, int matchIndex, PointerPressedEventArgs e, Border border)
     {
         if (_vm == null) return;
         var tag = _tagComboBox?.SelectedItem?.ToString() ?? "\\k";
@@ -108,17 +108,23 @@ public class KaraokeBarControl : Grid
             prevMatch = allMatches[matchIndex - 1];
             if (int.TryParse(prevMatch.Groups[1].Value, out int fullDur))
             {
-                newDur = fullDur / 2;
+                var pos = e.GetPosition(border);
+                double ratio = pos.X / border.Bounds.Width;
+                ratio = System.Math.Max(0.0, System.Math.Min(1.0, ratio));
+
+                newDur = (int)System.Math.Round(fullDur * ratio);
                 remainingDur = fullDur - newDur;
             }
         }
 
-        var insertIdx = startIdx + (text.Length / 2);
-        string newText = _vm.EditText.Insert(insertIdx, "{" + tag + newDur + "}");
+        double charRatio = border.Bounds.Width > 0 ? e.GetPosition(border).X / border.Bounds.Width : 0.5;
+        charRatio = System.Math.Max(0.0, System.Math.Min(1.0, charRatio));
+        var insertIdx = startIdx + (int)System.Math.Round(text.Length * charRatio);
+        string newText = _vm.EditText.Insert(insertIdx, "{" + tag + remainingDur + "}");
 
-        if (prevMatch != null && remainingDur > 0)
+        if (prevMatch != null && remainingDur >= 0)
         {
-            newText = newText.Remove(prevMatch.Groups[1].Index, prevMatch.Groups[1].Length).Insert(prevMatch.Groups[1].Index, remainingDur.ToString());
+            newText = newText.Remove(prevMatch.Groups[1].Index, prevMatch.Groups[1].Length).Insert(prevMatch.Groups[1].Index, newDur.ToString());
         }
         else if (prevMatch == null)
         {
@@ -142,10 +148,7 @@ public class KaraokeBarControl : Grid
 
         var newText = _vm.EditText.Remove(removeStart, removeLen);
 
-        // Clean up empty {} if any
-        newText = newText.Replace("{}", "");
-
-        // Find previous tag to add duration to it
+        // Find previous tag to add duration to it BEFORE cleaning up empty {} so index is reliable
         var prevMatches = Regex.Matches(newText.Substring(0, removeStart > newText.Length ? newText.Length : removeStart), @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}");
         if (prevMatches.Count > 0)
         {
@@ -156,6 +159,9 @@ public class KaraokeBarControl : Grid
                 newText = newText.Remove(prevMatch.Groups[1].Index, prevMatch.Groups[1].Length).Insert(prevMatch.Groups[1].Index, newDur.ToString());
             }
         }
+
+        // Clean up empty {} if any
+        newText = newText.Replace("{}", "");
 
         _vm.EditTextBox.Text = newText;
     }
