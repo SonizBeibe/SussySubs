@@ -1447,6 +1447,15 @@ public static partial class InitListViewAndEditBox
 
         formatToolbar.Children.Add(new Button { Content = "Gestor de Estilos", Command = vm.ShowAssaStylesCommand, Margin = new Thickness(5, 0, 0, 0) });
 
+        var karaokeModeButton = new Avalonia.Controls.Primitives.ToggleButton
+        {
+            Content = "Karaoke",
+            Margin = new Thickness(5, 0, 0, 0)
+        };
+        karaokeModeButton.Bind(Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty, new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.TwoWay });
+        karaokeModeButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay });
+        formatToolbar.Children.Add(karaokeModeButton);
+
         var buttonEffects = new Button { Content = "Efectos", Margin = new Thickness(5, 0, 0, 0) };
         var flyoutEffects = new MenuFlyout();
         var luaService = new Nikse.SubtitleEdit.Logic.Automation.LuaAutomationService();
@@ -1750,9 +1759,6 @@ public static partial class InitListViewAndEditBox
             posVisualButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay });
             buttonPanel.Children.Add(posVisualButton);
 
-            var karaokeButton = UiUtil.MakeButton(vm.ToggleKaraokeModeCommand, IconNames.AccountVoice, "Toggle karaoke mode");
-            karaokeButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay });
-            buttonPanel.Children.Add(karaokeButton);
         }
 
         if (Se.Settings.Appearance.TextBoxShowButtonRemoveFormatting)
@@ -1800,6 +1806,7 @@ public static partial class InitListViewAndEditBox
         };
         Grid.SetColumn(karaokeBarControl, 1);
         karaokePanel.Children.Add(karaokeBarControl);
+        karaokeBarControl.Setup(vm, tagComboBox);
 
         Grid.SetRow(karaokePanel, 2);
         mainGrid.Children.Add(karaokePanel);

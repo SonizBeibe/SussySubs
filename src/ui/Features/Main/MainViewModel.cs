@@ -24399,6 +24399,7 @@ public partial class MainViewModel :
 
     private bool _isDraggingPos = false;
     private bool _isVisualPosMode = false;
+    [ObservableProperty]
     private bool _isKaraokeMode = false;
 
     [RelayCommand]
@@ -24411,15 +24412,6 @@ public partial class MainViewModel :
             UpdateVisualPosOverlay();
         }
     }
-
-    [RelayCommand]
-    private void ToggleKaraokeMode()
-    {
-        _isKaraokeMode = !_isKaraokeMode;
-        OnPropertyChanged(nameof(IsKaraokeMode));
-    }
-
-    public bool IsKaraokeMode => _isKaraokeMode;
 
     private void UpdateVisualPosOverlay()
     {

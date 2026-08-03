@@ -460,7 +460,8 @@ public class AudioVisualizer : Control
             ZoomFactorProperty,
             VerticalZoomFactorProperty,
             CurrentVideoPositionSecondsProperty,
-            AllSelectedParagraphsProperty);
+            AllSelectedParagraphsProperty,
+            IsKaraokeModeProperty);
 
         PointerMoved += OnPointerMoved;
         PointerEntered += OnPointerEntered;
@@ -991,7 +992,7 @@ public class AudioVisualizer : Control
             {
                 _dragKaraokeParagraph = hit.Paragraph;
                 _dragKaraokeIndex = hit.Index;
-                _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\{\\[kK][fo]?(\d+)\}").Cast<System.Text.RegularExpressions.Match>().ToList();
+                _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\\[kK][fo]?(\d+)").Cast<System.Text.RegularExpressions.Match>().ToList();
                 return;
             }
         }
@@ -1003,6 +1004,11 @@ public class AudioVisualizer : Control
         UpdateCursor(point);
 
         var p = _cachedHitParagraph;
+        if (IsKaraokeMode && p != null && (AllSelectedParagraphs == null || !AllSelectedParagraphs.Contains(p)))
+        {
+            return;
+        }
+
         if (p == null)
         {
             _interactionMode = InteractionMode.New;
@@ -1303,18 +1309,15 @@ public class AudioVisualizer : Control
                     var nextMatch = _dragKaraokeMatches[_dragKaraokeIndex + 1];
                     var nextTag = nextMatch.Groups[0].Value;
 
-                    var newCurrentTag = "{\\k" + newCurrentK + "}";
-                    var newNextTag = "{\\k" + newNextK + "}";
-
-                    // We must rebuild text string
+                    // We must rebuild text string, replacing only the numbers
                     var newText = text;
-                    newText = newText.Remove(nextMatch.Index, nextMatch.Length).Insert(nextMatch.Index, newNextTag);
-                    newText = newText.Remove(match.Index, match.Length).Insert(match.Index, newCurrentTag);
+                    newText = newText.Remove(nextMatch.Groups[1].Index, nextMatch.Groups[1].Length).Insert(nextMatch.Groups[1].Index, newNextK.ToString());
+                    newText = newText.Remove(match.Groups[1].Index, match.Groups[1].Length).Insert(match.Groups[1].Index, newCurrentK.ToString());
 
                     _dragKaraokeParagraph.Text = newText;
 
                     // Update matches
-                    _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\{\\[kK][fo]?(\d+)\}").Cast<System.Text.RegularExpressions.Match>().ToList();
+                    _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\\[kK][fo]?(\d+)").Cast<System.Text.RegularExpressions.Match>().ToList();
                 }
             }
             InvalidateVisual();
@@ -3051,8 +3054,11 @@ public class AudioVisualizer : Control
         var text = paragraph.Text;
         int idx = 0;
         double currentTime = 0;
+        double previousX = currentRegionLeft;
 
         var pen = new Pen(Brushes.Yellow, 2) { DashStyle = DashStyle.Dash };
+
+        var matches = System.Text.RegularExpressions.Regex.Matches(text, @"\\[kK][fo]?(\d+)");
 
         while ((idx = text.IndexOf("{\\", idx)) >= 0)
         {
@@ -3060,7 +3066,7 @@ public class AudioVisualizer : Control
             if (endIdx < 0) break;
 
             var tag = text.Substring(idx, endIdx - idx + 1);
-            var match = System.Text.RegularExpressions.Regex.Match(tag, @"\{\\[kK][fo]?(\d+)\}");
+            var match = System.Text.RegularExpressions.Regex.Match(tag, @"\\[kK][fo]?(\d+)");
             if (match.Success)
             {
                 int duration10ms = int.Parse(match.Groups[1].Value);
@@ -3068,10 +3074,40 @@ public class AudioVisualizer : Control
                 currentTime += timeMs;
 
                 double x = currentRegionLeft + (currentTime / durationMs) * currentRegionWidth;
+
+                var blockRect = new Rect(previousX, 0, x - previousX, height);
+                context.DrawRectangle(new SolidColorBrush(Color.FromArgb(100, 200, 200, 200)), null, blockRect);
+
+                // Syllable text is the text *after* the current tag, up to the next tag
+                int nextIdx = text.IndexOf("{\\", endIdx + 1);
+                int endTextIdx = nextIdx >= 0 ? nextIdx : text.Length;
+
+                var sylText = text.Substring(endIdx + 1, endTextIdx - (endIdx + 1));
+                sylText = HtmlUtil.RemoveHtmlTags(sylText, true);
+
+                if (!string.IsNullOrEmpty(sylText))
+                {
+                    var formatted = GetCachedParagraphText(sylText);
+                    using (context.PushClip(blockRect))
+                    {
+                        context.DrawText(formatted, new Point(previousX + 3, height / 2 - 10));
+                    }
+                }
+
                 context.DrawLine(pen, new Point(x, 0), new Point(x, height));
+                previousX = x;
             }
 
             idx = endIdx + 1;
+        }
+
+        if (previousX < currentRegionLeft + currentRegionWidth)
+        {
+            var blockRect = new Rect(previousX, 0, (currentRegionLeft + currentRegionWidth) - previousX, height);
+            context.DrawRectangle(new SolidColorBrush(Color.FromArgb(100, 200, 200, 200)), null, blockRect);
+
+            // For the last remaining block (if any, usually empty unless timing doesn't cover whole line)
+            // But usually the last tag covers the rest of the text, so this is just a padding block
         }
     }
 
@@ -3990,7 +4026,7 @@ public class AudioVisualizer : Control
             var durationMs = p.Duration.TotalMilliseconds;
             if (durationMs <= 0) continue;
 
-            var matches = System.Text.RegularExpressions.Regex.Matches(p.Text, @"\{\\[kK][fo]?(\d+)\}");
+            var matches = System.Text.RegularExpressions.Regex.Matches(p.Text, @"\\[kK][fo]?(\d+)");
             if (matches.Count == 0) continue;
 
             int sampleRate = WavePeaks != null ? WavePeaks.SampleRate : 48000;
