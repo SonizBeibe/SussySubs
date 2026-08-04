@@ -428,6 +428,7 @@ public class AudioVisualizer : Control
     public event ParagraphNullableEventHandler? OnPrimarySingleClicked;
     public event ParagraphNullableEventHandler? OnPrimaryDoubleClicked;
     public event PositionEventHandler? OnSetStartAndOffsetTheRest;
+    public event EventHandler<string>? OnKaraokeDurationChanged;
 
     /// <summary>Raised when the user clicks the empty waveform to generate it on demand
     /// (shown only when auto-generate is off and there are no cached peaks).</summary>
@@ -993,8 +994,8 @@ public class AudioVisualizer : Control
                 _dragKaraokeParagraph = hit.Paragraph;
                 _dragKaraokeIndex = hit.Index;
                 _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\\[kK][fo]?(\d+)").Cast<System.Text.RegularExpressions.Match>().ToList();
-                return;
             }
+            return; // Interaction strictly locked to karaoke dividers in Karaoke mode
         }
 
         // Refresh the hit-test from the actual press point. The cached hover state is set only on
@@ -1004,10 +1005,6 @@ public class AudioVisualizer : Control
         UpdateCursor(point);
 
         var p = _cachedHitParagraph;
-        if (IsKaraokeMode && (p == null || AllSelectedParagraphs == null || !AllSelectedParagraphs.Contains(p)))
-        {
-            return;
-        }
 
         if (p == null)
         {
@@ -1318,6 +1315,7 @@ public class AudioVisualizer : Control
 
                     // Update matches
                     _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\\[kK][fo]?(\d+)").Cast<System.Text.RegularExpressions.Match>().ToList();
+                    OnKaraokeDurationChanged?.Invoke(this, newText);
                 }
             }
             InvalidateVisual();

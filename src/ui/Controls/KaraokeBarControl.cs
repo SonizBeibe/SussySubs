@@ -117,21 +117,22 @@ public class KaraokeBarControl : Grid
             }
         }
 
+        if (prevMatch == null)
+        {
+            return; // Do not insert \k0 tags before the first valid tag
+        }
+
         double charRatio = border.Bounds.Width > 0 ? e.GetPosition(border).X / border.Bounds.Width : 0.5;
         charRatio = System.Math.Max(0.0, System.Math.Min(1.0, charRatio));
         var insertIdx = startIdx + (int)System.Math.Round(text.Length * charRatio);
         string newText = _vm.EditText.Insert(insertIdx, "{" + tag + remainingDur + "}");
 
-        if (prevMatch != null && remainingDur >= 0)
+        if (remainingDur >= 0)
         {
             newText = newText.Remove(prevMatch.Groups[1].Index, prevMatch.Groups[1].Length).Insert(prevMatch.Groups[1].Index, newDur.ToString());
         }
-        else if (prevMatch == null)
-        {
-             newText = _vm.EditText.Insert(insertIdx, "{" + tag + "0}");
-        }
 
-        _vm.EditTextBox.Text = newText;
+        _vm.EditText = newText;
     }
 
     private void OnSeparatorClicked(Match match)
@@ -163,6 +164,6 @@ public class KaraokeBarControl : Grid
         // Clean up empty {} if any
         newText = newText.Replace("{}", "");
 
-        _vm.EditTextBox.Text = newText;
+        _vm.EditText = newText;
     }
 }
