@@ -209,6 +209,7 @@ public partial class MainViewModel :
 
     [ObservableProperty] private string _editText;
     [ObservableProperty] private string _editTextCharactersPerSecond;
+    [ObservableProperty] private bool _isKaraokeMode;
     [ObservableProperty] private IBrush _editTextCharactersPerSecondBackground;
     [ObservableProperty] private string _editTextTotalLength;
     [ObservableProperty] private IBrush _editTextTotalLengthBackground;
@@ -24399,8 +24400,7 @@ public partial class MainViewModel :
 
     private bool _isDraggingPos = false;
     private bool _isVisualPosMode = false;
-    [ObservableProperty]
-    private bool _isKaraokeMode = false;
+
 
     [RelayCommand]
     private void ToggleVisualPosMode()
