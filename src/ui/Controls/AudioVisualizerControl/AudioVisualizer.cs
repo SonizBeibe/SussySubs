@@ -2933,11 +2933,15 @@ public class AudioVisualizer : Control
             }
         }
 
-        foreach (var p in paragraphs)
+        if (paragraphs != null)
         {
-            if (p.EndTime.TotalMilliseconds >= startPositionMilliseconds && p.StartTime.TotalMilliseconds <= endPositionMilliseconds)
+            foreach (var p in paragraphs)
             {
-                DrawParagraph(p, context, ref renderCtx);
+                if (!_selectedParagraphsRenderSet.Contains(p)) continue;
+                if (p.EndTime.TotalMilliseconds >= startPositionMilliseconds && p.StartTime.TotalMilliseconds <= endPositionMilliseconds)
+                {
+                    DrawParagraph(p, context, ref renderCtx);
+                }
             }
         }
     }
