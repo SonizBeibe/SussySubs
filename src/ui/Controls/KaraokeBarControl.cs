@@ -78,6 +78,17 @@ public class KaraokeBarControl : Grid
         }
     }
 
+    private string GetTag()
+    {
+        if (_tagComboBox?.SelectedItem is ComboBoxItem cbi)
+        {
+            return cbi.Content?.ToString() ?? "\\k";
+        }
+        var str = _tagComboBox?.SelectedItem?.ToString() ?? "\\k";
+        var match = Regex.Match(str, @"\\[kK][fo]?");
+        return match.Success ? match.Value : "\\k";
+    }
+
     private void RenderSyllables()
     {
         _panel.Children.Clear();
@@ -87,8 +98,9 @@ public class KaraokeBarControl : Grid
 
         if (!Regex.IsMatch(text, @"^\{[^}]*\\[kK][fo]?\d+[^}]*\}"))
         {
-            var tag = _tagComboBox?.SelectedItem?.ToString() ?? "\\k";
-            text = "{" + tag + "0}" + text;
+            var tag = GetTag();
+            int totalCentiseconds = (int)System.Math.Round(_vm.SelectedSubtitle.Duration.TotalMilliseconds / 10.0);
+            text = "{" + tag + totalCentiseconds + "}" + text;
             ActualizarTexto(text);
             return;
         }
@@ -173,7 +185,7 @@ public class KaraokeBarControl : Grid
     private void OnSyllableClicked(int startIdx, string text, int matchIndex, PointerPressedEventArgs e, Border border)
     {
         if (_vm?.SelectedSubtitle == null) return;
-        var tag = _tagComboBox?.SelectedItem?.ToString() ?? "\\k";
+        var tag = GetTag();
 
         int newDur = 0;
         int remainingDur = 0;
@@ -214,8 +226,23 @@ public class KaraokeBarControl : Grid
 
         double charRatio = border.Bounds.Width > 0 ? e.GetPosition(border).X / border.Bounds.Width : 0.5;
         charRatio = System.Math.Max(0.0, System.Math.Min(1.0, charRatio));
-        var insertIdx = startIdx + (int)System.Math.Round(text.Length * charRatio);
-        string newText = _vm.SelectedSubtitle.Text.Insert(insertIdx, "{" + tag + remainingDur + "}");
+
+        var cleanSyllableText = Regex.Replace(text, @"\{[^}]*\}", "");
+        int targetCleanIndex = (int)System.Math.Round(cleanSyllableText.Length * charRatio);
+        int cleanCount = 0;
+        int rawInsertIndex = startIdx;
+        bool insideTag = false;
+        var fullText = _vm.SelectedSubtitle.Text;
+
+        while (rawInsertIndex < fullText.Length && cleanCount < targetCleanIndex)
+        {
+            if (fullText[rawInsertIndex] == '{') insideTag = true;
+            if (!insideTag) cleanCount++;
+            if (fullText[rawInsertIndex] == '}') insideTag = false;
+            rawInsertIndex++;
+        }
+
+        string newText = fullText.Insert(rawInsertIndex, "{" + tag + remainingDur + "}");
 
         if (remainingDur >= 0)
         {
