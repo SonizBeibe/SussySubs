@@ -12,7 +12,6 @@ namespace Nikse.SubtitleEdit.Controls;
 public class KaraokeBarControl : Grid
 {
     private MainViewModel? _vm;
-    private ComboBox? _tagComboBox;
     private readonly WrapPanel _panel;
     private readonly Canvas _overlayCanvas;
     private readonly Border _guideLine;
@@ -37,10 +36,9 @@ public class KaraokeBarControl : Grid
         Children.Add(innerGrid);
     }
 
-    public void Setup(MainViewModel vm, ComboBox tagComboBox)
+    public void Setup(MainViewModel vm)
     {
         _vm = vm;
-        _tagComboBox = tagComboBox;
 
         _vm.PropertyChanged += (s, e) =>
         {
@@ -80,27 +78,7 @@ public class KaraokeBarControl : Grid
 
     private string GetTag()
     {
-        string? str = null;
-        if (_tagComboBox?.SelectedItem is ComboBoxItem cbi)
-        {
-            str = cbi.Content?.ToString();
-        }
-        else if (_tagComboBox?.SelectedItem is ContentControl cc)
-        {
-            str = cc.Content?.ToString();
-        }
-        else
-        {
-            str = _tagComboBox?.SelectedItem?.ToString();
-        }
-
-        if (string.IsNullOrEmpty(str))
-        {
-            return "\\k";
-        }
-
-        var match = Regex.Match(str, @"\\[kK][fo]?");
-        return match.Success ? match.Value.Trim() : "\\k";
+        return "\\k";
     }
 
     private void RenderSyllables()

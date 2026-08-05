@@ -1287,105 +1287,23 @@ public static partial class InitListViewAndEditBox
         panelStyle.Children.Add(comboStyle);
         timeControlsPanel.Children.Add(panelStyle);
 
-        // Advanced Horizontal Row: Effect, Margins, Comment
-        var panelAdvancedRow = new StackPanel
+        var panelCommentAndKaraoke = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 10,
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.HasFormatStyle)),
             Margin = new Thickness(0, 0, 10, 0),
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        // Effect
-        var labelEffect = new TextBlock
+        var karaokeModeButton = new Avalonia.Controls.Primitives.ToggleButton
         {
-            Text = "Eff:",
-            FontWeight = FontWeight.Bold,
-            VerticalAlignment = VerticalAlignment.Center,
+            Content = "Karaoke",
+            VerticalAlignment = VerticalAlignment.Center
         };
-        panelAdvancedRow.Children.Add(labelEffect);
+        karaokeModeButton.Bind(Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty, new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.TwoWay });
+        karaokeModeButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay });
+        panelCommentAndKaraoke.Children.Add(karaokeModeButton);
 
-        var textEffect = new TextBox
-        {
-            DataContext = vm,
-            Width = 100,
-            VerticalAlignment = VerticalAlignment.Center,
-            [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Effect)}")
-            {
-                Mode = BindingMode.TwoWay
-            }
-        };
-        textEffect.TextChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
-        panelAdvancedRow.Children.Add(textEffect);
-
-        // MarginL
-        var labelMarginL = new TextBlock
-        {
-            Text = "L:",
-            FontWeight = FontWeight.Bold,
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-        panelAdvancedRow.Children.Add(labelMarginL);
-
-        var textMarginL = new TextBox
-        {
-            DataContext = vm,
-            Width = 40,
-            VerticalAlignment = VerticalAlignment.Center,
-            [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.MarginL)}")
-            {
-                Mode = BindingMode.TwoWay
-            }
-        };
-        textMarginL.TextChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
-        panelAdvancedRow.Children.Add(textMarginL);
-
-        // MarginR
-        var labelMarginR = new TextBlock
-        {
-            Text = "R:",
-            FontWeight = FontWeight.Bold,
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-        panelAdvancedRow.Children.Add(labelMarginR);
-
-        var textMarginR = new TextBox
-        {
-            DataContext = vm,
-            Width = 40,
-            VerticalAlignment = VerticalAlignment.Center,
-            [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.MarginR)}")
-            {
-                Mode = BindingMode.TwoWay
-            }
-        };
-        textMarginR.TextChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
-        panelAdvancedRow.Children.Add(textMarginR);
-
-        // MarginV
-        var labelMarginV = new TextBlock
-        {
-            Text = "V:",
-            FontWeight = FontWeight.Bold,
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-        panelAdvancedRow.Children.Add(labelMarginV);
-
-        var textMarginV = new TextBox
-        {
-            DataContext = vm,
-            Width = 40,
-            VerticalAlignment = VerticalAlignment.Center,
-            [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.MarginV)}")
-            {
-                Mode = BindingMode.TwoWay
-            }
-        };
-        textMarginV.TextChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
-        panelAdvancedRow.Children.Add(textMarginV);
-
-        // Comment Checkbox
         var commentCheckBox = new CheckBox
         {
             DataContext = vm,
@@ -1397,10 +1315,9 @@ public static partial class InitListViewAndEditBox
             }
         };
         commentCheckBox.IsCheckedChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
-        panelAdvancedRow.Children.Add(commentCheckBox);
+        panelCommentAndKaraoke.Children.Add(commentCheckBox);
 
-        timeControlsPanel.Children.Add(panelAdvancedRow);
-
+        timeControlsPanel.Children.Add(panelCommentAndKaraoke);
 
         if (!Se.Settings.Appearance.ShowUpDownStartTime ||
             !Se.Settings.Appearance.ShowUpDownEndTime || 
@@ -1533,15 +1450,6 @@ public static partial class InitListViewAndEditBox
         formatToolbar.Children.Add(new Button { Content = "\\4c", Command = vm.TextBoxColor4Command });
 
         formatToolbar.Children.Add(new Button { Content = "Gestor de Estilos", Command = vm.ShowAssaStylesCommand, Margin = new Thickness(5, 0, 0, 0) });
-
-        var karaokeModeButton = new Avalonia.Controls.Primitives.ToggleButton
-        {
-            Content = "Karaoke",
-            Margin = new Thickness(5, 0, 0, 0)
-        };
-        karaokeModeButton.Bind(Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty, new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.TwoWay });
-        karaokeModeButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay });
-        formatToolbar.Children.Add(karaokeModeButton);
 
         var buttonEffects = new Button { Content = "Efectos", Margin = new Thickness(5, 0, 0, 0) };
         var flyoutEffects = new MenuFlyout();
@@ -1872,18 +1780,9 @@ public static partial class InitListViewAndEditBox
         var karaokePanel = new Grid
         {
             Margin = new Thickness(10, 0, 10, 10),
-            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
+            ColumnDefinitions = new ColumnDefinitions("*"),
             [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.OneWay }
         };
-
-        var tagComboBox = new ComboBox
-        {
-            ItemsSource = new[] { "\\k", "\\kf", "\\ko" },
-            SelectedIndex = 0,
-            Margin = new Thickness(0, 0, 10, 0),
-            VerticalAlignment = VerticalAlignment.Center
-        };
-        karaokePanel.Children.Add(tagComboBox);
 
         var karaokeBarControl = new KaraokeBarControl
         {
@@ -1891,9 +1790,9 @@ public static partial class InitListViewAndEditBox
             Background = new SolidColorBrush(Color.Parse("#22888888")), // Slight background to see it
             Margin = new Thickness(0)
         };
-        Grid.SetColumn(karaokeBarControl, 1);
+        Grid.SetColumn(karaokeBarControl, 0);
         karaokePanel.Children.Add(karaokeBarControl);
-        karaokeBarControl.Setup(vm, tagComboBox);
+        karaokeBarControl.Setup(vm);
 
         Grid.SetRow(karaokePanel, 2);
         mainGrid.Children.Add(karaokePanel);
