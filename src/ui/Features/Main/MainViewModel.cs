@@ -16620,9 +16620,38 @@ public partial class MainViewModel :
 
             if (Se.Settings.Video.AutoOpen && skipLoadVideo == false)
             {
+                var assVideoFile = AdvancedSubStationAlpha.GetTagValueFromHeader("Video File", "[Script Info]", _subtitle.Header);
+                var assAudioFile = AdvancedSubStationAlpha.GetTagValueFromHeader("Audio File", "[Script Info]", _subtitle.Header);
+                string? headerVideoPath = null;
+                string? headerAudioPath = null;
+
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(assVideoFile))
+                    {
+                        headerVideoPath = Path.Combine(Path.GetDirectoryName(fileName) ?? string.Empty, assVideoFile.Trim());
+                    }
+                    if (!string.IsNullOrWhiteSpace(assAudioFile))
+                    {
+                        headerAudioPath = Path.Combine(Path.GetDirectoryName(fileName) ?? string.Empty, assAudioFile.Trim());
+                    }
+                }
+                catch
+                {
+                    // Ignore path combination errors
+                }
+
                 if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
                 {
                     await VideoOpenFile(videoFileName, desiredAudioTrackId);
+                }
+                else if (!string.IsNullOrEmpty(headerVideoPath) && File.Exists(headerVideoPath))
+                {
+                    await VideoOpenFile(headerVideoPath, desiredAudioTrackId);
+                }
+                else if (!string.IsNullOrEmpty(headerAudioPath) && File.Exists(headerAudioPath))
+                {
+                    await VideoOpenFile(headerAudioPath, desiredAudioTrackId);
                 }
                 else if (TryGetRecentVideoFileName(fileName, out var recentVideoFileName))
                 {

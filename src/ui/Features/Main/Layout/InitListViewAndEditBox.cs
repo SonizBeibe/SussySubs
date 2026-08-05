@@ -1287,32 +1287,119 @@ public static partial class InitListViewAndEditBox
         panelStyle.Children.Add(comboStyle);
         timeControlsPanel.Children.Add(panelStyle);
 
-        // Effect display
-        var panelEffect = new StackPanel
+        // Advanced Horizontal Row: Effect, Margins, Comment
+        var panelAdvancedRow = new StackPanel
         {
-            Spacing = 0,
-            Orientation = Orientation.Vertical,
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
             [!Visual.IsVisibleProperty] = new Binding(nameof(vm.HasFormatStyle)),
             Margin = new Thickness(0, 0, 10, 0),
+            VerticalAlignment = VerticalAlignment.Center,
         };
+
+        // Effect
         var labelEffect = new TextBlock
         {
-            Text = "Effect",
+            Text = "Eff:",
             FontWeight = FontWeight.Bold,
-        }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
-        panelEffect.Children.Add(labelEffect);
-        var comboEffect = new ComboBox
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        panelAdvancedRow.Children.Add(labelEffect);
+
+        var textEffect = new TextBox
         {
             DataContext = vm,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.AssaEffects)),
-            [!ComboBox.SelectedItemProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Effect)}")
+            Width = 100,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Effect)}")
             {
                 Mode = BindingMode.TwoWay
             }
         };
-        panelEffect.Children.Add(comboEffect);
-        timeControlsPanel.Children.Add(panelEffect);
+        textEffect.TextChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
+        panelAdvancedRow.Children.Add(textEffect);
+
+        // MarginL
+        var labelMarginL = new TextBlock
+        {
+            Text = "L:",
+            FontWeight = FontWeight.Bold,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        panelAdvancedRow.Children.Add(labelMarginL);
+
+        var textMarginL = new TextBox
+        {
+            DataContext = vm,
+            Width = 40,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.MarginL)}")
+            {
+                Mode = BindingMode.TwoWay
+            }
+        };
+        textMarginL.TextChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
+        panelAdvancedRow.Children.Add(textMarginL);
+
+        // MarginR
+        var labelMarginR = new TextBlock
+        {
+            Text = "R:",
+            FontWeight = FontWeight.Bold,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        panelAdvancedRow.Children.Add(labelMarginR);
+
+        var textMarginR = new TextBox
+        {
+            DataContext = vm,
+            Width = 40,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.MarginR)}")
+            {
+                Mode = BindingMode.TwoWay
+            }
+        };
+        textMarginR.TextChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
+        panelAdvancedRow.Children.Add(textMarginR);
+
+        // MarginV
+        var labelMarginV = new TextBlock
+        {
+            Text = "V:",
+            FontWeight = FontWeight.Bold,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        panelAdvancedRow.Children.Add(labelMarginV);
+
+        var textMarginV = new TextBox
+        {
+            DataContext = vm,
+            Width = 40,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.MarginV)}")
+            {
+                Mode = BindingMode.TwoWay
+            }
+        };
+        textMarginV.TextChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
+        panelAdvancedRow.Children.Add(textMarginV);
+
+        // Comment Checkbox
+        var commentCheckBox = new CheckBox
+        {
+            DataContext = vm,
+            Content = "Comment",
+            VerticalAlignment = VerticalAlignment.Center,
+            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.IsComment)}")
+            {
+                Mode = BindingMode.TwoWay
+            }
+        };
+        commentCheckBox.IsCheckedChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
+        panelAdvancedRow.Children.Add(commentCheckBox);
+
+        timeControlsPanel.Children.Add(panelAdvancedRow);
 
 
         if (!Se.Settings.Appearance.ShowUpDownStartTime ||
