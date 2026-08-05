@@ -14,12 +14,27 @@ public class KaraokeBarControl : Grid
     private MainViewModel? _vm;
     private ComboBox? _tagComboBox;
     private readonly WrapPanel _panel;
+    private readonly Canvas _overlayCanvas;
+    private readonly Border _guideLine;
     private INotifyPropertyChanged? _currentSubtitle;
 
     public KaraokeBarControl()
     {
         _panel = new WrapPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-        Children.Add(_panel);
+        _overlayCanvas = new Canvas { IsHitTestVisible = false };
+        _guideLine = new Border
+        {
+            Background = Brushes.Red,
+            Width = 1,
+            IsVisible = false
+        };
+        _overlayCanvas.Children.Add(_guideLine);
+
+        var innerGrid = new Grid();
+        innerGrid.Children.Add(_panel);
+        innerGrid.Children.Add(_overlayCanvas);
+
+        Children.Add(innerGrid);
     }
 
     public void Setup(MainViewModel vm, ComboBox tagComboBox)
@@ -69,6 +84,15 @@ public class KaraokeBarControl : Grid
         if (_vm?.SelectedSubtitle == null || string.IsNullOrEmpty(_vm.SelectedSubtitle.Text)) return;
 
         var text = _vm.SelectedSubtitle.Text;
+
+        if (!Regex.IsMatch(text, @"^\{[^}]*\\[kK][fo]?\d+[^}]*\}"))
+        {
+            var tag = _tagComboBox?.SelectedItem?.ToString() ?? "\\k";
+            text = "{" + tag + "0}" + text;
+            ActualizarTexto(text);
+            return;
+        }
+
         var matches = Regex.Matches(text, @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}");
 
         int lastIdx = 0;
@@ -85,11 +109,17 @@ public class KaraokeBarControl : Grid
                 {
                     Background = new SolidColorBrush(Color.Parse("#33888888")),
                     Margin = new Thickness(1),
-                    Padding = new Thickness(4, 2)
+                    Padding = new Thickness(12, 2)
                 };
 
                 var stack = new StackPanel { Orientation = Orientation.Vertical, HorizontalAlignment = HorizontalAlignment.Center };
-                var textBlock = new TextBlock { Text = displaySyllableText, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center };
+                var textBlock = new TextBlock
+                {
+                    Text = displaySyllableText,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    LetterSpacing = 2
+                };
                 stack.Children.Add(textBlock);
 
                 // Try to get duration of the previous tag, since in ASS the tag precedes the syllable
@@ -104,6 +134,21 @@ public class KaraokeBarControl : Grid
                 int currentStringIndex = start;
                 int currentMatchIndex = i;
                 border.PointerPressed += (s, e) => OnSyllableClicked(currentStringIndex, rawSyllableText, currentMatchIndex, e, border);
+
+                border.PointerMoved += (s, e) =>
+                {
+                    var point = e.GetPosition(_overlayCanvas);
+                    Canvas.SetLeft(_guideLine, point.X);
+                    Canvas.SetTop(_guideLine, border.Bounds.Top);
+                    _guideLine.Height = border.Bounds.Height;
+                    _guideLine.IsVisible = true;
+                };
+
+                border.PointerExited += (s, e) =>
+                {
+                    _guideLine.IsVisible = false;
+                };
+
                 _panel.Children.Add(border);
             }
 
@@ -145,6 +190,20 @@ public class KaraokeBarControl : Grid
 
                 newDur = (int)System.Math.Round(fullDur * ratio);
                 remainingDur = fullDur - newDur;
+
+                if (fullDur > 1)
+                {
+                    if (newDur == 0)
+                    {
+                        newDur = 1;
+                        remainingDur = fullDur - 1;
+                    }
+                    else if (remainingDur == 0)
+                    {
+                        remainingDur = 1;
+                        newDur = fullDur - 1;
+                    }
+                }
             }
         }
 
@@ -163,8 +222,7 @@ public class KaraokeBarControl : Grid
             newText = newText.Remove(prevMatch.Groups[1].Index, prevMatch.Groups[1].Length).Insert(prevMatch.Groups[1].Index, newDur.ToString());
         }
 
-        _vm.SelectedSubtitle.Text = newText;
-        _vm.SubtitleTextChanged(null, null);
+        ActualizarTexto(newText);
     }
 
     private void OnSeparatorClicked(Match match)
@@ -196,7 +254,15 @@ public class KaraokeBarControl : Grid
         // Clean up empty {} if any
         newText = newText.Replace("{}", "");
 
-        _vm.SelectedSubtitle.Text = newText;
-        _vm.SubtitleTextChanged(null, null);
+        ActualizarTexto(newText);
+    }
+
+    private void ActualizarTexto(string newText)
+    {
+        if (_vm?.SelectedSubtitle != null)
+        {
+            _vm.SelectedSubtitle.Text = newText;
+            _vm.SubtitleTextChanged(null, null);
+        }
     }
 }
