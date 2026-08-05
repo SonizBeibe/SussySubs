@@ -951,6 +951,11 @@ public class AudioVisualizer : Control
         _activeParagraph = null;
         _selectionMoveSnapshot.Clear();
 
+        if (IsKaraokeMode && _dragKaraokeParagraph != null)
+        {
+            OnKaraokeDurationChanged?.Invoke(this, _dragKaraokeParagraph.Text);
+        }
+
         _dragKaraokeParagraph = null;
         _dragKaraokeIndex = -1;
         _dragKaraokeMatches = null;
@@ -1281,12 +1286,10 @@ public class AudioVisualizer : Control
                     }
                 }
 
+                // Get the current tag duration
+                double currentTagDurMs = int.Parse(match.Groups[1].Value) * 10.0;
+
                 // We need to adjust current syllable and the next one (if any)
-                double newCurrentDurMs = targetMs - previousTimeMs;
-                if (newCurrentDurMs < 0) newCurrentDurMs = 0;
-
-                int newCurrentK = (int)System.Math.Round(newCurrentDurMs / 10.0);
-
                 if (_dragKaraokeIndex + 1 < _dragKaraokeMatches.Count)
                 {
                     double nextTimeMs = 0;
@@ -1295,16 +1298,19 @@ public class AudioVisualizer : Control
                         nextTimeMs = nkdur * 10.0;
                     }
 
-                    double totalTwoSyllablesMs = (int.Parse(match.Groups[1].Value) * 10.0) + nextTimeMs;
-                    double newNextDurMs = totalTwoSyllablesMs - newCurrentDurMs;
-                    if (newNextDurMs < 0) newNextDurMs = 0;
+                    double maxAllowedTimeMs = previousTimeMs + currentTagDurMs + nextTimeMs;
 
+                    // Clamp to prevent dragging past neighbors
+                    targetMs = System.Math.Clamp(targetMs, previousTimeMs, maxAllowedTimeMs);
+
+                    double newCurrentDurMs = targetMs - previousTimeMs;
+                    int newCurrentK = (int)System.Math.Round(newCurrentDurMs / 10.0);
+
+                    double newNextDurMs = maxAllowedTimeMs - targetMs;
                     int newNextK = (int)System.Math.Round(newNextDurMs / 10.0);
 
                     // Apply changes
-                    var currentTag = match.Groups[0].Value;
                     var nextMatch = _dragKaraokeMatches[_dragKaraokeIndex + 1];
-                    var nextTag = nextMatch.Groups[0].Value;
 
                     // We must rebuild text string, replacing only the numbers
                     var newText = text;
@@ -1315,7 +1321,6 @@ public class AudioVisualizer : Control
 
                     // Update matches
                     _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\\[kK][fo]?(\d+)").Cast<System.Text.RegularExpressions.Match>().ToList();
-                    OnKaraokeDurationChanged?.Invoke(this, newText);
                 }
             }
             InvalidateVisual();
