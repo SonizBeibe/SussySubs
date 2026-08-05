@@ -5,6 +5,7 @@ using Avalonia.Media;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Features.Main;
 using System.Text.RegularExpressions;
+using System.ComponentModel;
 
 namespace Nikse.SubtitleEdit.Controls;
 
@@ -13,6 +14,7 @@ public class KaraokeBarControl : Grid
     private MainViewModel? _vm;
     private ComboBox? _tagComboBox;
     private readonly WrapPanel _panel;
+    private INotifyPropertyChanged? _currentSubtitle;
 
     public KaraokeBarControl()
     {
@@ -24,20 +26,49 @@ public class KaraokeBarControl : Grid
     {
         _vm = vm;
         _tagComboBox = tagComboBox;
+
         _vm.PropertyChanged += (s, e) =>
         {
-            if (e.PropertyName == nameof(_vm.EditText))
+            if (e.PropertyName == nameof(_vm.SelectedSubtitle))
+            {
+                UpdateSubtitleSubscription();
                 RenderSyllables();
+            }
         };
+
+        UpdateSubtitleSubscription();
         RenderSyllables();
+    }
+
+    private void UpdateSubtitleSubscription()
+    {
+        if (_currentSubtitle != null)
+        {
+            _currentSubtitle.PropertyChanged -= OnSubtitlePropertyChanged;
+        }
+
+        _currentSubtitle = _vm?.SelectedSubtitle as INotifyPropertyChanged;
+
+        if (_currentSubtitle != null)
+        {
+            _currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
+        }
+    }
+
+    private void OnSubtitlePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == "Text")
+        {
+            RenderSyllables();
+        }
     }
 
     private void RenderSyllables()
     {
         _panel.Children.Clear();
-        if (_vm == null || string.IsNullOrEmpty(_vm.EditText)) return;
+        if (_vm?.SelectedSubtitle == null || string.IsNullOrEmpty(_vm.SelectedSubtitle.Text)) return;
 
-        var text = _vm.EditText;
+        var text = _vm.SelectedSubtitle.Text;
         var matches = Regex.Matches(text, @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}");
 
         int lastIdx = 0;
@@ -96,13 +127,13 @@ public class KaraokeBarControl : Grid
 
     private void OnSyllableClicked(int startIdx, string text, int matchIndex, PointerPressedEventArgs e, Border border)
     {
-        if (_vm == null) return;
+        if (_vm?.SelectedSubtitle == null) return;
         var tag = _tagComboBox?.SelectedItem?.ToString() ?? "\\k";
 
         int newDur = 0;
         int remainingDur = 0;
         Match? prevMatch = null;
-        var allMatches = Regex.Matches(_vm.EditText, @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}");
+        var allMatches = Regex.Matches(_vm.SelectedSubtitle.Text, @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}");
         if (matchIndex > 0 && matchIndex - 1 < allMatches.Count)
         {
             prevMatch = allMatches[matchIndex - 1];
@@ -125,19 +156,20 @@ public class KaraokeBarControl : Grid
         double charRatio = border.Bounds.Width > 0 ? e.GetPosition(border).X / border.Bounds.Width : 0.5;
         charRatio = System.Math.Max(0.0, System.Math.Min(1.0, charRatio));
         var insertIdx = startIdx + (int)System.Math.Round(text.Length * charRatio);
-        string newText = _vm.EditText.Insert(insertIdx, "{" + tag + remainingDur + "}");
+        string newText = _vm.SelectedSubtitle.Text.Insert(insertIdx, "{" + tag + remainingDur + "}");
 
         if (remainingDur >= 0)
         {
             newText = newText.Remove(prevMatch.Groups[1].Index, prevMatch.Groups[1].Length).Insert(prevMatch.Groups[1].Index, newDur.ToString());
         }
 
-        _vm.EditText = newText;
+        _vm.SelectedSubtitle.Text = newText;
+        _vm.SubtitleTextChanged(null, null);
     }
 
     private void OnSeparatorClicked(Match match)
     {
-        if (_vm == null) return;
+        if (_vm?.SelectedSubtitle == null) return;
 
         int durToRemove = int.Parse(match.Groups[1].Value);
 
@@ -147,7 +179,7 @@ public class KaraokeBarControl : Grid
         int removeStart = match.Index + innerMatch.Index;
         int removeLen = innerMatch.Length;
 
-        var newText = _vm.EditText.Remove(removeStart, removeLen);
+        var newText = _vm.SelectedSubtitle.Text.Remove(removeStart, removeLen);
 
         // Find previous tag to add duration to it BEFORE cleaning up empty {} so index is reliable
         var prevMatches = Regex.Matches(newText.Substring(0, removeStart > newText.Length ? newText.Length : removeStart), @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}");
@@ -164,6 +196,7 @@ public class KaraokeBarControl : Grid
         // Clean up empty {} if any
         newText = newText.Replace("{}", "");
 
-        _vm.EditText = newText;
+        _vm.SelectedSubtitle.Text = newText;
+        _vm.SubtitleTextChanged(null, null);
     }
 }
