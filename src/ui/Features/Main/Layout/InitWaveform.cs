@@ -77,7 +77,14 @@ public class InitWaveform
             vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
             vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerOnVideoPositionChanged;
             vm.AudioVisualizer.Bind(AudioVisualizer.IsKaraokeModeProperty, new Binding(nameof(vm.IsKaraokeMode)) { Source = vm, Mode = BindingMode.OneWay });
-            vm.AudioVisualizer.OnKaraokeDurationChanged += (s, text) => vm.EditText = text;
+            vm.AudioVisualizer.OnKaraokeDurationChanged += (s, text) =>
+            {
+                if (vm.SelectedSubtitle != null)
+                {
+                    vm.SelectedSubtitle.Text = text;
+                    vm.SubtitleTextChanged(null, null);
+                }
+            };
             vm.AudioVisualizer.OnToggleSelection += vm.AudioVisualizerOnToggleSelection;
             //vm.AudioVisualizer.OnParagraphDoubleTapped += vm.OnWaveformDoubleTapped;
             vm.AudioVisualizer.OnPrimarySingleClicked += vm.AudioVisualizerOnPrimarySingleClicked;

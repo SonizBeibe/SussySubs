@@ -1,0 +1,13 @@
+1. Hide Full Text & Footer in Karaoke Mode
+- In AudioVisualizer.cs, modify `DrawParagraph` function.
+- Wrap the block checking `Se.Settings.Waveform.WaveformUnwrapText` and the `DrawParagraphFooter` call in `if (!IsKaraokeMode) { ... }`.
+2. Make Karaoke Syllable Text Bigger
+- In AudioVisualizer.cs, modify `DrawKaraokeDividers`.
+- Remove `GetCachedParagraphText` for karaoke syllables.
+- Create a new `FormattedText` for `sylText` using a larger font (e.g., _fontSize + 6) and `FontWeight.Bold`. Use `_typeface` or new Typeface. Center it.
+3. Waveform Dragging MUST Save
+- In AudioVisualizer.cs, `OnPointerReleased`, when `IsKaraokeMode` is true and `_dragKaraokeParagraph` is not null, `OnKaraokeDurationChanged` is called which sets `vm.EditText`. But the memory says "MainViewModel.SelectedSubtitle.Text property, not EditText... invoke _vm.SubtitleTextChanged(null, null)". Wait, `OnKaraokeDurationChanged` fires an event. Let's see what happens. The memory says: "the main active subtitle text is stored in and bound to the MainViewModel.SelectedSubtitle.Text property, not EditText (which does not exist). Always ensure SelectedSubtitle is not null before accessing its properties". I will change `InitWaveform.cs` to set `vm.SelectedSubtitle.Text` and call `vm.SubtitleTextChanged(null, null)` OR change it directly in AudioVisualizer? Wait, the prompt says: "In OnPointerReleased, if _dragKaraokeParagraph is not null, you MUST trigger the view model update to save the text (e.g., fire OnKaraokeDurationChanged or call the VM directly) and then clear the _dragKaraokeParagraph and _dragKaraokeIndex variables." `AudioVisualizer.cs` already fires `OnKaraokeDurationChanged`. Let's check where it connects. In `InitWaveform.cs`: `vm.AudioVisualizer.OnKaraokeDurationChanged += (s, text) => vm.EditText = text;`. I should change this to `vm.AudioVisualizer.OnKaraokeDurationChanged += (s, text) => { if (vm.SelectedSubtitle != null) { vm.SelectedSubtitle.Text = text; vm.SubtitleTextChanged(null, null); } };`.
+4. Fix Tag Selector
+- In KaraokeBarControl.cs, inside `GetTag()`:
+  Extract string safely checking for `ContentControl` or `ComboBoxItem`. The memory says: "retrieving the string value from a selected ComboBox item often requires casting SelectedItem to ComboBoxItem and accessing its Content property (or using Regex on ToString()), rather than relying solely on .ToString()". The prompt says: "strictly parse it to extract the actual string content (e.g., as string or check if it's a ContentControl and grab the Content.ToString()). Ensure no trailing spaces are included."
+  Fix both Auto-Initializer and `OnSyllableClicked` functions to use this tag.
