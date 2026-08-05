@@ -80,13 +80,27 @@ public class KaraokeBarControl : Grid
 
     private string GetTag()
     {
+        string? str = null;
         if (_tagComboBox?.SelectedItem is ComboBoxItem cbi)
         {
-            return cbi.Content?.ToString() ?? "\\k";
+            str = cbi.Content?.ToString();
         }
-        var str = _tagComboBox?.SelectedItem?.ToString() ?? "\\k";
+        else if (_tagComboBox?.SelectedItem is ContentControl cc)
+        {
+            str = cc.Content?.ToString();
+        }
+        else
+        {
+            str = _tagComboBox?.SelectedItem?.ToString();
+        }
+
+        if (string.IsNullOrEmpty(str))
+        {
+            return "\\k";
+        }
+
         var match = Regex.Match(str, @"\\[kK][fo]?");
-        return match.Success ? match.Value : "\\k";
+        return match.Success ? match.Value.Trim() : "\\k";
     }
 
     private void RenderSyllables()

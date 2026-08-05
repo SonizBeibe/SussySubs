@@ -794,6 +794,16 @@ public class AudioVisualizer : Control
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isMetaDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
 
+        if (IsKaraokeMode && _dragKaraokeParagraph != null)
+        {
+            OnKaraokeDurationChanged?.Invoke(this, _dragKaraokeParagraph.Text);
+            _dragKaraokeParagraph = null;
+            _dragKaraokeIndex = -1;
+            _dragKaraokeMatches = null;
+            InvalidateVisual();
+            return;
+        }
+
         var nsp = NewSelectionParagraph;
         if (nsp is { Duration.TotalMilliseconds: <= 1 })
         {
@@ -950,11 +960,6 @@ public class AudioVisualizer : Control
         _interactionMode = InteractionMode.None;
         _activeParagraph = null;
         _selectionMoveSnapshot.Clear();
-
-        if (IsKaraokeMode && _dragKaraokeParagraph != null)
-        {
-            OnKaraokeDurationChanged?.Invoke(this, _dragKaraokeParagraph.Text);
-        }
 
         _dragKaraokeParagraph = null;
         _dragKaraokeIndex = -1;
@@ -3027,23 +3032,26 @@ public class AudioVisualizer : Control
 
         using (context.PushClip(textBounds))
         {
-            if (Se.Settings.Waveform.WaveformUnwrapText)
+            if (!IsKaraokeMode)
             {
-                var formattedText = GetCachedParagraphText(prepared.Unwrapped);
-                context.DrawText(formattedText, new Point(currentRegionLeft + 3, 14));
-            }
-            else
-            {
-                double addY = 0;
-                foreach (var line in prepared.Lines)
+                if (Se.Settings.Waveform.WaveformUnwrapText)
                 {
-                    var formattedText = GetCachedParagraphText(line);
-                    context.DrawText(formattedText, new Point(currentRegionLeft + 3, 14 + addY));
-                    addY += formattedText.Height;
+                    var formattedText = GetCachedParagraphText(prepared.Unwrapped);
+                    context.DrawText(formattedText, new Point(currentRegionLeft + 3, 14));
                 }
-            }
+                else
+                {
+                    double addY = 0;
+                    foreach (var line in prepared.Lines)
+                    {
+                        var formattedText = GetCachedParagraphText(line);
+                        context.DrawText(formattedText, new Point(currentRegionLeft + 3, 14 + addY));
+                        addY += formattedText.Height;
+                    }
+                }
 
-            DrawParagraphFooter(context, paragraph, currentRegionLeft, currentRegionWidth, height, ref renderCtx);
+                DrawParagraphFooter(context, paragraph, currentRegionLeft, currentRegionWidth, height, ref renderCtx);
+            }
         }
 
         // Karaoke dividers
@@ -3094,10 +3102,12 @@ public class AudioVisualizer : Control
 
                 if (!string.IsNullOrEmpty(sylText))
                 {
-                    var formatted = GetCachedParagraphText(sylText);
+                    var formatted = new FormattedText(sylText, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface(UiUtil.GetDefaultFontName(), FontStyle.Normal, FontWeight.Bold), 20, _paintText);
                     using (context.PushClip(blockRect))
                     {
-                        context.DrawText(formatted, new Point(previousX + 3, height / 2 - 10));
+                        double textX = previousX + ((x - previousX) - formatted.Width) / 2;
+                        if (textX < previousX) textX = previousX;
+                        context.DrawText(formatted, new Point(textX, (height - formatted.Height) / 2));
                     }
                 }
 
