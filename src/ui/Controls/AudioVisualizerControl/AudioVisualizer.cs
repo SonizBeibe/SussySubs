@@ -1004,8 +1004,9 @@ public class AudioVisualizer : Control
                 _dragKaraokeParagraph = hit.Paragraph;
                 _dragKaraokeIndex = hit.Index;
                 _dragKaraokeMatches = System.Text.RegularExpressions.Regex.Matches(_dragKaraokeParagraph.Text, @"\\[kK][fo]?(\d+)").Cast<System.Text.RegularExpressions.Match>().ToList();
+                e.Handled = true;
+                return; // Only lock interaction if a karaoke divider was hit
             }
-            return; // Interaction strictly locked to karaoke dividers in Karaoke mode
         }
 
         // Refresh the hit-test from the actual press point. The cached hover state is set only on
@@ -1235,35 +1236,7 @@ public class AudioVisualizer : Control
             return;
         }
 
-        if (_interactionMode == InteractionMode.None || _activeParagraph == null)
-        {
-            UpdateCursor(point);
-            return;
-        }
-
-        var deltaX = point.X - _startPointerPosition.X;
-        var deltaSeconds = RelativeXPositionToSeconds(deltaX);
-
-        if (_interactionMode == InteractionMode.ResizingLeftOr && _activeParagraphPrevious != null)
-        {
-            if (Math.Abs(deltaX) < 3)
-            {
-                return;
-            }
-
-            if (_startPointerPosition.X < point.X)
-            {
-                _interactionMode = InteractionMode.ResizingLeft;
-            }
-            else
-            {
-                _activeParagraph = _activeParagraphPrevious;
-                _originalStartSeconds = _activeParagraph.StartTime.TotalSeconds;
-                _originalEndSeconds = _activeParagraph.EndTime.TotalSeconds;
-                _interactionMode = InteractionMode.ResizingRight;
-            }
-        }
-        else if (IsKaraokeMode && _dragKaraokeParagraph != null && _dragKaraokeIndex >= 0 && _dragKaraokeMatches != null)
+        if (IsKaraokeMode && _dragKaraokeParagraph != null && _dragKaraokeIndex >= 0 && _dragKaraokeMatches != null)
         {
             var text = _dragKaraokeParagraph.Text;
             var match = _dragKaraokeMatches[_dragKaraokeIndex];
@@ -1329,6 +1302,36 @@ public class AudioVisualizer : Control
                 }
             }
             InvalidateVisual();
+            return;
+        }
+
+        if (_interactionMode == InteractionMode.None || _activeParagraph == null)
+        {
+            UpdateCursor(point);
+            return;
+        }
+
+        var deltaX = point.X - _startPointerPosition.X;
+        var deltaSeconds = RelativeXPositionToSeconds(deltaX);
+
+        if (_interactionMode == InteractionMode.ResizingLeftOr && _activeParagraphPrevious != null)
+        {
+            if (Math.Abs(deltaX) < 3)
+            {
+                return;
+            }
+
+            if (_startPointerPosition.X < point.X)
+            {
+                _interactionMode = InteractionMode.ResizingLeft;
+            }
+            else
+            {
+                _activeParagraph = _activeParagraphPrevious;
+                _originalStartSeconds = _activeParagraph.StartTime.TotalSeconds;
+                _originalEndSeconds = _activeParagraph.EndTime.TotalSeconds;
+                _interactionMode = InteractionMode.ResizingRight;
+            }
         }
         else if (_interactionMode == InteractionMode.ResizingRightOr && _activeParagraphNext != null)
         {
