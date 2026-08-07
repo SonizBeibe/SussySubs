@@ -1314,7 +1314,10 @@ public static partial class InitListViewAndEditBox
                 Mode = BindingMode.TwoWay
             }
         };
-        commentCheckBox.IsCheckedChanged += (s, e) => { vm.SubtitleTextChanged(null, null); };
+        commentCheckBox.IsCheckedChanged += (s, e) => {
+            vm.SubtitleTextChanged(null, null);
+            vm.SubtitleGridSelectionChanged();
+        };
         panelCommentAndKaraoke.Children.Add(commentCheckBox);
 
         timeControlsPanel.Children.Add(panelCommentAndKaraoke);

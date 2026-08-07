@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -90,10 +91,6 @@ public class KaraokeBarControl : Grid
 
         if (!Regex.IsMatch(text, @"^\{[^}]*\\[kK][fo]?\d+[^}]*\}"))
         {
-            var tag = GetTag();
-            int totalCentiseconds = (int)System.Math.Round(_vm.SelectedSubtitle.Duration.TotalMilliseconds / 10.0);
-            text = "{" + tag + totalCentiseconds + "}" + text;
-            ActualizarTexto(text);
             return;
         }
 
@@ -179,10 +176,38 @@ public class KaraokeBarControl : Grid
         if (_vm?.SelectedSubtitle == null) return;
         var tag = GetTag();
 
+        if (!Regex.IsMatch(_vm.SelectedSubtitle.Text, @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}"))
+        {
+            int totalCentiseconds = (int)System.Math.Round(_vm.SelectedSubtitle.Duration.TotalMilliseconds / 10.0);
+            string initText = "{" + tag + totalCentiseconds + "}" + _vm.SelectedSubtitle.Text;
+            ActualizarTexto(initText);
+            return;
+        }
+
         int newDur = 0;
         int remainingDur = 0;
         Match? prevMatch = null;
         var allMatches = Regex.Matches(_vm.SelectedSubtitle.Text, @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}");
+
+        double totalMs = _vm.SelectedSubtitle.StartTime.TotalMilliseconds;
+        for (int j = 0; j < matchIndex; j++)
+        {
+            if (int.TryParse(allMatches[j].Groups[1].Value, out int dur))
+            {
+                totalMs += dur * 10;
+            }
+        }
+        _vm.ActiveSyllableStartTime = TimeSpan.FromMilliseconds(totalMs);
+
+        if (matchIndex < allMatches.Count && int.TryParse(allMatches[matchIndex].Groups[1].Value, out int clickedDur))
+        {
+            _vm.ActiveSyllableEndTime = TimeSpan.FromMilliseconds(totalMs + (clickedDur * 10));
+        }
+        else
+        {
+            _vm.ActiveSyllableEndTime = _vm.SelectedSubtitle.EndTime;
+        }
+
         if (matchIndex > 0 && matchIndex - 1 < allMatches.Count)
         {
             prevMatch = allMatches[matchIndex - 1];
