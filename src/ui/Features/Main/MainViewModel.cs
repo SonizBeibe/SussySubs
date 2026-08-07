@@ -210,6 +210,8 @@ public partial class MainViewModel :
     [ObservableProperty] private string _editText;
     [ObservableProperty] private string _editTextCharactersPerSecond;
     [ObservableProperty] private bool _isKaraokeMode;
+    public TimeSpan? ActiveSyllableStartTime { get; set; }
+    public TimeSpan? ActiveSyllableEndTime { get; set; }
     [ObservableProperty] private IBrush _editTextCharactersPerSecondBackground;
     [ObservableProperty] private string _editTextTotalLength;
     [ObservableProperty] private IBrush _editTextTotalLengthBackground;
@@ -16641,17 +16643,22 @@ public partial class MainViewModel :
                     // Ignore path combination errors
                 }
 
-                if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
-                {
-                    await VideoOpenFile(videoFileName, desiredAudioTrackId);
-                }
-                else if (!string.IsNullOrEmpty(headerVideoPath) && File.Exists(headerVideoPath))
+                if (!string.IsNullOrEmpty(headerVideoPath) && File.Exists(headerVideoPath))
                 {
                     await VideoOpenFile(headerVideoPath, desiredAudioTrackId);
+
+                    if (!string.IsNullOrEmpty(headerAudioPath) && File.Exists(headerAudioPath) && headerAudioPath != headerVideoPath)
+                    {
+                        await VideoOpenFile(headerAudioPath, desiredAudioTrackId);
+                    }
                 }
                 else if (!string.IsNullOrEmpty(headerAudioPath) && File.Exists(headerAudioPath))
                 {
                     await VideoOpenFile(headerAudioPath, desiredAudioTrackId);
+                }
+                else if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
+                {
+                    await VideoOpenFile(videoFileName, desiredAudioTrackId);
                 }
                 else if (TryGetRecentVideoFileName(fileName, out var recentVideoFileName))
                 {
@@ -21689,6 +21696,30 @@ public partial class MainViewModel :
                 return;
             }
 
+            if (keyEventArgs.Key == Key.S && keyEventArgs.KeyModifiers == KeyModifiers.None && !IsTextInputFocused())
+            {
+                var vp = GetVideoPlayerControl();
+                if (vp != null && SelectedSubtitle != null)
+                {
+                    double startSecs = SelectedSubtitle.StartTime.TotalSeconds;
+                    double endSecs = SelectedSubtitle.EndTime.TotalSeconds;
+
+                    if (IsKaraokeMode && ActiveSyllableStartTime.HasValue && ActiveSyllableEndTime.HasValue)
+                    {
+                        startSecs = ActiveSyllableStartTime.Value.TotalSeconds;
+                        endSecs = ActiveSyllableEndTime.Value.TotalSeconds;
+                    }
+
+                    vp.VideoPlayer.Pause();
+                    vp.Position = startSecs;
+                    PinPlayheadTo(startSecs);
+                    _playSelectionItem = new PlaySelectionItem(new List<SubtitleLineViewModel> { SelectedSubtitle }, TimeSpan.FromSeconds(endSecs), false);
+                    vp.VideoPlayer.Play();
+                    keyEventArgs.Handled = true;
+                    return;
+                }
+            }
+
             if (IsTextInputFocused())
             {
                 // Right-to-left subtitles need visually-correct word / line caret movement:
@@ -22234,12 +22265,14 @@ public partial class MainViewModel :
         return Subtitles.IndexOf(item);
     }
 
-    private void SubtitleGridSelectionChanged()
+    internal void SubtitleGridSelectionChanged()
     {
         var selectedItems = SubtitleGridSelectedItems;
         EditTextBox.ClearSelection();
         EditTextBoxOriginal.ClearSelection();
         ResetPlaySelection();
+        ActiveSyllableStartTime = null;
+        ActiveSyllableEndTime = null;
         _updateAudioVisualizer = true;
 
         if (selectedItems == null || selectedItems.Count == 0)
@@ -24481,6 +24514,15 @@ public partial class MainViewModel :
             double vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
             double vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
 
+            var prx = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResX", "[Script Info]", _subtitle.Header);
+            var pry = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResY", "[Script Info]", _subtitle.Header);
+            if (double.TryParse(prx, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double prxVal) &&
+                double.TryParse(pry, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double pryVal))
+            {
+                vidWidth = prxVal;
+                vidHeight = pryVal;
+            }
+
             double cWidth = VideoPlayerControl.Bounds.Width;
             double cHeight = VideoPlayerControl.Bounds.Height;
 
@@ -24576,6 +24618,15 @@ public partial class MainViewModel :
         double cHeight = VideoPlayerControl.Bounds.Height;
         double vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
         double vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
+
+        var prx = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResX", "[Script Info]", _subtitle.Header);
+        var pry = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResY", "[Script Info]", _subtitle.Header);
+        if (double.TryParse(prx, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double prxVal) &&
+            double.TryParse(pry, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double pryVal))
+        {
+            vidWidth = prxVal;
+            vidHeight = pryVal;
+        }
 
         if (cWidth == 0 || cHeight == 0) return;
 

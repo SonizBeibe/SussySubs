@@ -1,0 +1,32 @@
+--- src/ui/Controls/KaraokeBarControl.cs
++++ src/ui/Controls/KaraokeBarControl.cs
+@@ -88,14 +88,7 @@
+         var text = _vm.SelectedSubtitle.Text;
+
+         if (!Regex.IsMatch(text, @"^\{[^}]*\\[kK][fo]?\d+[^}]*\}"))
+-        {
+-            var tag = GetTag();
+-            int totalCentiseconds = (int)System.Math.Round(_vm.SelectedSubtitle.Duration.TotalMilliseconds / 10.0);
+-            text = "{" + tag + totalCentiseconds + "}" + text;
+-            ActualizarTexto(text);
+             return;
+-        }
+
+         var matches = Regex.Matches(text, @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}");
+
+@@ -176,6 +169,15 @@
+     {
+         if (_vm?.SelectedSubtitle == null) return;
+         var tag = GetTag();
++
++        if (!Regex.IsMatch(_vm.SelectedSubtitle.Text, @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}"))
++        {
++            var initTag = GetTag();
++            int totalCentiseconds = (int)System.Math.Round(_vm.SelectedSubtitle.Duration.TotalMilliseconds / 10.0);
++            string initText = "{" + initTag + totalCentiseconds + "}" + _vm.SelectedSubtitle.Text;
++            ActualizarTexto(initText);
++            return;
++        }
+
+         int newDur = 0;
+         int remainingDur = 0;
