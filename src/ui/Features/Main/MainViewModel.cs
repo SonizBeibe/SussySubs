@@ -1372,6 +1372,9 @@ public partial class MainViewModel :
             }
         }
 
+        var updatedStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(_subtitle.Header);
+        AssaStyles = new System.Collections.ObjectModel.ObservableCollection<string>(updatedStyles.Select(style => style.Name));
+
         RefreshSubtitlePreview();
     }
 
@@ -1431,6 +1434,9 @@ public partial class MainViewModel :
                 }
             }
         }
+
+        var updatedStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(_subtitle.Header);
+        AssaStyles = new System.Collections.ObjectModel.ObservableCollection<string>(updatedStyles.Select(style => style.Name));
 
         RefreshSubtitlePreview();
     }
@@ -20944,7 +20950,7 @@ public partial class MainViewModel :
         }
     }
 
-    private bool IsTextInputFocused()
+    internal bool IsTextInputFocused()
     {
         var focusedElement = Window?.FocusManager?.GetFocusedElement();
 
@@ -21587,6 +21593,28 @@ public partial class MainViewModel :
         return true;
     }
 
+    internal void PlaySelectedSubtitleShortcut()
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp != null && SelectedSubtitle != null)
+        {
+            double startSecs = SelectedSubtitle.StartTime.TotalSeconds;
+            double endSecs = SelectedSubtitle.EndTime.TotalSeconds;
+
+            if (IsKaraokeMode && ActiveSyllableStartTime.HasValue && ActiveSyllableEndTime.HasValue)
+            {
+                startSecs = ActiveSyllableStartTime.Value.TotalSeconds;
+                endSecs = ActiveSyllableEndTime.Value.TotalSeconds;
+            }
+
+            vp.VideoPlayer.Pause();
+            vp.Position = startSecs;
+            PinPlayheadTo(startSecs);
+            _playSelectionItem = new PlaySelectionItem(new List<SubtitleLineViewModel> { SelectedSubtitle }, TimeSpan.FromSeconds(endSecs), false);
+            vp.VideoPlayer.Play();
+        }
+    }
+
     internal void OnKeyDownHandler(object? sender, KeyEventArgs keyEventArgs)
     {
         lock (_onKeyDownHandlerLock)
@@ -21694,30 +21722,6 @@ public partial class MainViewModel :
             if (_shortcutManager.ActiveKeyCount == 0)
             {
                 return;
-            }
-
-            if (keyEventArgs.Key == Key.S && keyEventArgs.KeyModifiers == KeyModifiers.None && !IsTextInputFocused())
-            {
-                var vp = GetVideoPlayerControl();
-                if (vp != null && SelectedSubtitle != null)
-                {
-                    double startSecs = SelectedSubtitle.StartTime.TotalSeconds;
-                    double endSecs = SelectedSubtitle.EndTime.TotalSeconds;
-
-                    if (IsKaraokeMode && ActiveSyllableStartTime.HasValue && ActiveSyllableEndTime.HasValue)
-                    {
-                        startSecs = ActiveSyllableStartTime.Value.TotalSeconds;
-                        endSecs = ActiveSyllableEndTime.Value.TotalSeconds;
-                    }
-
-                    vp.VideoPlayer.Pause();
-                    vp.Position = startSecs;
-                    PinPlayheadTo(startSecs);
-                    _playSelectionItem = new PlaySelectionItem(new List<SubtitleLineViewModel> { SelectedSubtitle }, TimeSpan.FromSeconds(endSecs), false);
-                    vp.VideoPlayer.Play();
-                    keyEventArgs.Handled = true;
-                    return;
-                }
             }
 
             if (IsTextInputFocused())
