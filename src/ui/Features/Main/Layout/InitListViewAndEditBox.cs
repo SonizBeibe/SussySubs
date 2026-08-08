@@ -1315,8 +1315,13 @@ public static partial class InitListViewAndEditBox
             }
         };
         commentCheckBox.IsCheckedChanged += (s, e) => {
-            vm.SubtitleTextChanged(null, null);
-            vm.SubtitleGridSelectionChanged();
+            if (vm.SelectedSubtitle != null) {
+                int idx = vm.Subtitles.IndexOf(vm.SelectedSubtitle);
+                if (idx >= 0) {
+                    vm.Subtitles[idx] = vm.SelectedSubtitle;
+                }
+                vm.SubtitleTextChanged(null, null);
+            }
         };
         panelCommentAndKaraoke.Children.Add(commentCheckBox);
 

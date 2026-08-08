@@ -118,6 +118,14 @@ public class MainView : ViewBase
 
         root.Children.Add(_vm.ContentGrid);
 
+        AddHandler(KeyDownEvent, (s, e) =>
+        {
+            if (e.Key == Avalonia.Input.Key.S && e.KeyModifiers == Avalonia.Input.KeyModifiers.None && !_vm.IsTextInputFocused())
+            {
+                _vm.PlaySelectedSubtitleShortcut();
+                e.Handled = true;
+            }
+        }, RoutingStrategies.Tunnel);
         AddHandler(KeyDownEvent, _vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
         AddHandler(KeyUpEvent, _vm.OnKeyUpHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
 
