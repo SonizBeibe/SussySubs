@@ -21603,15 +21603,22 @@ public partial class MainViewModel :
 
             if (IsKaraokeMode && ActiveSyllableStartTime.HasValue && ActiveSyllableEndTime.HasValue)
             {
-                startSecs = ActiveSyllableStartTime.Value.TotalSeconds;
-                endSecs = ActiveSyllableEndTime.Value.TotalSeconds;
+                double start = ActiveSyllableStartTime.Value.TotalSeconds;
+                double end = ActiveSyllableEndTime.Value.TotalSeconds;
+                vp.VideoPlayer.Pause();
+                vp.Position = start;
+                PinPlayheadTo(start);
+                _playSelectionItem = new PlaySelectionItem(new List<SubtitleLineViewModel> { SelectedSubtitle }, TimeSpan.FromSeconds(end), false);
+                vp.VideoPlayer.Play();
             }
-
-            vp.VideoPlayer.Pause();
-            vp.Position = startSecs;
-            PinPlayheadTo(startSecs);
-            _playSelectionItem = new PlaySelectionItem(new List<SubtitleLineViewModel> { SelectedSubtitle }, TimeSpan.FromSeconds(endSecs), false);
-            vp.VideoPlayer.Play();
+            else
+            {
+                vp.VideoPlayer.Pause();
+                vp.Position = startSecs;
+                PinPlayheadTo(startSecs);
+                _playSelectionItem = new PlaySelectionItem(new List<SubtitleLineViewModel> { SelectedSubtitle }, TimeSpan.FromSeconds(endSecs), false);
+                vp.VideoPlayer.Play();
+            }
         }
     }
 
@@ -22058,7 +22065,6 @@ public partial class MainViewModel :
 
                     SubtitleGrid.ScrollIntoView(Subtitles[rowIndex]);
                     SubtitleGridSelectionChanged();
-                    e.Handled = true;
                     return;
                 }
             }
@@ -22095,7 +22101,6 @@ public partial class MainViewModel :
 
         SubtitleGrid.SelectedItem = Subtitles[rowIndex];
         OnSubtitleGridDoubleTapped(SubtitleGrid, e);
-        e.Handled = true;
     }
 
     private int GetDataGridRowIndexFromPoint(Avalonia.Point position)

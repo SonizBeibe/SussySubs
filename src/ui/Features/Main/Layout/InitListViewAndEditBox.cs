@@ -91,7 +91,7 @@ public static partial class InitListViewAndEditBox
         dropHost.AddHandler(DragDrop.DropEvent, vm.SubtitleGridOnDrop, RoutingStrategies.Bubble);
 
         vm.SubtitleGrid.Tapped += vm.OnSubtitleGridSingleTapped;
-        dropHost.AddHandler(InputElement.DoubleTappedEvent, vm.SubtitleGridDropHost_DoubleTapped, RoutingStrategies.Bubble, handledEventsToo: true);
+        dropHost.AddHandler(InputElement.DoubleTappedEvent, vm.SubtitleGridDropHost_DoubleTapped, RoutingStrategies.Bubble);
 
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
@@ -1113,9 +1113,9 @@ public static partial class InitListViewAndEditBox
 
         // Set the ContextFlyout on the drop host so right-clicks on empty space also show the menu
         dropHost.ContextFlyout = flyout;
-        dropHost.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
-        dropHost.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
-        dropHost.AddHandler(InputElement.PointerMovedEvent, vm.SubtitleGrid_PointerMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
+        dropHost.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
+        dropHost.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel);
+        dropHost.AddHandler(InputElement.PointerMovedEvent, vm.SubtitleGrid_PointerMoved, RoutingStrategies.Tunnel);
 
         // Edit area - restructured with time controls on left, multiline text on right
         var editGrid = new Grid
@@ -1284,6 +1284,14 @@ public static partial class InitListViewAndEditBox
                 Mode = BindingMode.TwoWay
             }
         };
+        comboStyle.SelectionChanged += (s, e) =>
+        {
+            if (vm.SelectedSubtitle != null)
+            {
+                vm.SelectedSubtitle.RefreshTextRendering();
+                vm.SubtitleTextChanged(null, null);
+            }
+        };
         panelStyle.Children.Add(comboStyle);
         timeControlsPanel.Children.Add(panelStyle);
 
@@ -1316,10 +1324,7 @@ public static partial class InitListViewAndEditBox
         };
         commentCheckBox.IsCheckedChanged += (s, e) => {
             if (vm.SelectedSubtitle != null) {
-                int idx = vm.Subtitles.IndexOf(vm.SelectedSubtitle);
-                if (idx >= 0) {
-                    vm.Subtitles[idx] = vm.SelectedSubtitle;
-                }
+                vm.SelectedSubtitle.RefreshTextRendering();
                 vm.SubtitleTextChanged(null, null);
             }
         };
