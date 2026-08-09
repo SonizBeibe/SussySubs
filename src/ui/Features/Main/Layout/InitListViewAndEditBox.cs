@@ -1305,11 +1305,12 @@ public static partial class InitListViewAndEditBox
 
         var karaokeModeButton = new Avalonia.Controls.Primitives.ToggleButton
         {
+            DataContext = vm,
             Content = "Karaoke",
-            VerticalAlignment = VerticalAlignment.Center
+            VerticalAlignment = VerticalAlignment.Center,
+            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.TwoWay },
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay }
         };
-        karaokeModeButton.Bind(Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty, new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.TwoWay });
-        karaokeModeButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay });
         panelCommentAndKaraoke.Children.Add(karaokeModeButton);
 
         var commentCheckBox = new CheckBox
@@ -1792,6 +1793,7 @@ public static partial class InitListViewAndEditBox
         // K-timing Panel
         var karaokePanel = new Grid
         {
+            DataContext = vm,
             Margin = new Thickness(10, 0, 10, 10),
             ColumnDefinitions = new ColumnDefinitions("*"),
             [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.OneWay }
