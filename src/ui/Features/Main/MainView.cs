@@ -120,12 +120,22 @@ public class MainView : ViewBase
 
         AddHandler(KeyDownEvent, (s, e) =>
         {
+            if (e.Handled)
+            {
+                return;
+            }
+
             if (e.Key == Avalonia.Input.Key.S && e.KeyModifiers == Avalonia.Input.KeyModifiers.None && !_vm.IsTextInputFocused())
             {
                 _vm.PlaySelectedSubtitleShortcut();
                 e.Handled = true;
+                return;
             }
-        }, RoutingStrategies.Tunnel);
+
+            // Explicitly ensure e.Handled = false for unrelated input events
+            // if we are not handling them
+            e.Handled = false;
+        }, RoutingStrategies.Bubble);
         AddHandler(KeyDownEvent, _vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
         AddHandler(KeyUpEvent, _vm.OnKeyUpHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
 

@@ -1318,13 +1318,39 @@ public static partial class InitListViewAndEditBox
             DataContext = vm,
             Content = "Comment",
             VerticalAlignment = VerticalAlignment.Center,
-            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.IsComment)}")
+        };
+
+        SubtitleLineViewModel? oldSubtitle = null;
+
+        void UpdateCommentCheckBox(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SubtitleLineViewModel.IsComment))
             {
-                Mode = BindingMode.TwoWay
+                commentCheckBox.IsChecked = vm.SelectedSubtitle?.IsComment ?? false;
+            }
+        }
+
+        vm.PropertyChanged += (s, e) => {
+            if (e.PropertyName == nameof(vm.SelectedSubtitle)) {
+                commentCheckBox.IsChecked = vm.SelectedSubtitle?.IsComment ?? false;
+
+                if (oldSubtitle != null)
+                {
+                    oldSubtitle.PropertyChanged -= UpdateCommentCheckBox;
+                }
+
+                if (vm.SelectedSubtitle != null)
+                {
+                    vm.SelectedSubtitle.PropertyChanged += UpdateCommentCheckBox;
+                }
+
+                oldSubtitle = vm.SelectedSubtitle;
             }
         };
-        commentCheckBox.IsCheckedChanged += (s, e) => {
+
+        commentCheckBox.Click += (s, e) => {
             if (vm.SelectedSubtitle != null) {
+                vm.SelectedSubtitle.IsComment = commentCheckBox.IsChecked ?? false;
                 vm.SelectedSubtitle.RefreshTextRendering();
                 vm.SubtitleTextChanged(null, null);
             }
