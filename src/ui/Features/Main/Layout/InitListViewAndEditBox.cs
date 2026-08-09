@@ -1526,7 +1526,7 @@ public static partial class InitListViewAndEditBox
 
         var editorContainer = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto,*"),
+            RowDefinitions = new RowDefinitions("Auto,*,Auto"),
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch
         };
@@ -1536,6 +1536,28 @@ public static partial class InitListViewAndEditBox
         var textEditor = MakeTextBox(vm);
         editorContainer.Children.Add(textEditor);
         Grid.SetRow(textEditor, 1);
+
+        // K-timing Panel
+        var karaokePanel = new Grid
+        {
+            DataContext = vm,
+            Margin = new Thickness(0, 5, 0, 0),
+            ColumnDefinitions = new ColumnDefinitions("*"),
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.OneWay }
+        };
+
+        var karaokeBarControl = new KaraokeBarControl
+        {
+            MinHeight = 40,
+            Background = new SolidColorBrush(Color.Parse("#22888888")), // Slight background to see it
+            Margin = new Thickness(0)
+        };
+        Grid.SetColumn(karaokeBarControl, 0);
+        karaokePanel.Children.Add(karaokeBarControl);
+        karaokeBarControl.Setup(vm);
+
+        editorContainer.Children.Add(karaokePanel);
+        Grid.SetRow(karaokePanel, 2);
 
         textEditGrid.Children.Add(editorContainer);
         Grid.SetRow(editorContainer, 1);
@@ -1815,28 +1837,6 @@ public static partial class InitListViewAndEditBox
 
         Grid.SetRow(editGrid, 1);
         mainGrid.Children.Add(editGrid);
-
-        // K-timing Panel
-        var karaokePanel = new Grid
-        {
-            DataContext = vm,
-            Margin = new Thickness(10, 0, 10, 10),
-            ColumnDefinitions = new ColumnDefinitions("*"),
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsKaraokeMode)) { Mode = BindingMode.OneWay }
-        };
-
-        var karaokeBarControl = new KaraokeBarControl
-        {
-            MinHeight = 40,
-            Background = new SolidColorBrush(Color.Parse("#22888888")), // Slight background to see it
-            Margin = new Thickness(0)
-        };
-        Grid.SetColumn(karaokeBarControl, 0);
-        karaokePanel.Children.Add(karaokeBarControl);
-        karaokeBarControl.Setup(vm);
-
-        Grid.SetRow(karaokePanel, 2);
-        mainGrid.Children.Add(karaokePanel);
 
         textEditGrid.ColumnDefinitions[1].Bind(ColumnDefinition.WidthProperty, new Binding(nameof(vm.ShowColumnOriginalText))
         {
