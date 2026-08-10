@@ -89,10 +89,7 @@ public class KaraokeBarControl : Grid
 
         var text = _vm.SelectedSubtitle.Text;
 
-        if (!Regex.IsMatch(text, @"^\{[^}]*\\[kK][fo]?\d+[^}]*\}"))
-        {
-            return;
-        }
+
 
         var matches = Regex.Matches(text, @"\{[^}]*\\[kK][fo]?(\d+)[^}]*\}");
 
