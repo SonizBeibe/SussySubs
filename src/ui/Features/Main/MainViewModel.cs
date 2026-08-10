@@ -1029,7 +1029,7 @@ public partial class MainViewModel :
         mpv.SetAudioTrack(audioTrack.Id);
     }
 
-    private void RefreshSubtitlePreview()
+    public void RefreshSubtitlePreview()
     {
         _mpvReloader.Reset();
         _vlcReloader.Reset();

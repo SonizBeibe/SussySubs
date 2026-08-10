@@ -1353,6 +1353,7 @@ public static partial class InitListViewAndEditBox
                 vm.SelectedSubtitle.IsComment = commentCheckBox.IsChecked ?? false;
                 vm.SelectedSubtitle.RefreshTextRendering();
                 vm.SubtitleTextChanged(null, null);
+                vm.RefreshSubtitlePreview();
             }
         };
         panelCommentAndKaraoke.Children.Add(commentCheckBox);
