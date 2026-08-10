@@ -19,7 +19,8 @@ public class ColorPickerWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.ColorPickerTitle;
         CanResize = false;
-        SizeToContent = SizeToContent.WidthAndHeight;
+        Width = 700;
+        Height = 450;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         vm.Window = this;
         DataContext = vm;
@@ -56,7 +57,7 @@ public class ColorPickerWindow : Window
     {
         var mainGrid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto,15,Auto"),
+            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
             RowDefinitions = new RowDefinitions("Auto"),
             Margin = new Thickness(10)
         };
@@ -139,7 +140,8 @@ public class ColorPickerWindow : Window
         {
             Orientation = Orientation.Vertical,
             Spacing = 10,
-            MinWidth = 250
+            MinWidth = 250,
+            Margin = new Thickness(20, 0, 0, 0)
         };
 
         var rgbGroup = MakeGroupBox("RGB", CreateRgbPanel(vm, out hexTextBox));
@@ -163,7 +165,7 @@ public class ColorPickerWindow : Window
         rightPanel.Children.Add(hslHsvPanel);
         rightPanel.Children.Add(toolsGroup);
 
-        Grid.SetColumn(rightPanel, 2);
+        Grid.SetColumn(rightPanel, 1);
 
         mainGrid.Children.Add(leftPanel);
         mainGrid.Children.Add(rightPanel);
@@ -238,11 +240,20 @@ public class ColorPickerWindow : Window
         var panel = new StackPanel { Orientation = Orientation.Vertical, Spacing = 10 };
 
         // Dropper button (placeholder logic, usually requires external service, but we just add the button UI)
+        var dropperPathData = "M14.39,4.41L15.6,5.63L11.56,9.66L10.35,8.45L14.39,4.41M11.66,2.23C12,2.23 12.41,2.39 12.72,2.7L17.3,7.28C17.92,7.9 17.92,8.9 17.3,9.53L13.84,13H15.11L15.3,13.2L11,17.5V19.46L9.62,20.84L7.5,18.71L2.14,19.34L2.66,13.97L4.79,11.84L6.17,13.22V11L10.47,6.7L10.66,6.89V5.62L14.12,2.16C14.44,1.85 14.84,1.69 15.25,1.69M7.09,14.65C6.96,14.65 6.84,14.7 6.74,14.8L4.35,17.18L3.92,17L3.43,14L5.61,11.83L6.04,11.4L7.09,14.65Z";
+        var dropperIcon = new Avalonia.Controls.PathIcon
+        {
+            Data = Geometry.Parse(dropperPathData),
+            Width = 16,
+            Height = 16
+        };
+
         var btnDropper = new Button
         {
-            Content = "Eyedropper",
-            HorizontalAlignment = HorizontalAlignment.Left
+            Content = dropperIcon,
+            HorizontalAlignment = HorizontalAlignment.Left,
         };
+        ToolTip.SetTip(btnDropper, "Eyedropper");
         // Not binding command yet since it wasn't requested, just the layout
 
         var colorsGrid = new Grid
