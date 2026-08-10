@@ -19,7 +19,7 @@ public class ColorPickerWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.ColorPickerTitle;
         CanResize = false;
-        Width = 700;
+        Width = 750;
         Height = 450;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         vm.Window = this;
@@ -36,10 +36,10 @@ public class ColorPickerWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
-            Margin = UiUtil.MakeWindowMargin(),
+            Margin = new Thickness(15),
             RowSpacing = 10,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -58,8 +58,9 @@ public class ColorPickerWindow : Window
         var mainGrid = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("Auto,*"),
-            RowDefinitions = new RowDefinitions("Auto"),
-            Margin = new Thickness(10)
+            RowDefinitions = new RowDefinitions("*"),
+            Margin = new Thickness(15),
+            ColumnSpacing = 20
         };
 
         // --- Left Side (Visual Spectrum) ---
@@ -140,8 +141,7 @@ public class ColorPickerWindow : Window
         {
             Orientation = Orientation.Vertical,
             Spacing = 10,
-            MinWidth = 250,
-            Margin = new Thickness(20, 0, 0, 0)
+            MinWidth = 250
         };
 
         var rgbGroup = MakeGroupBox("RGB", CreateRgbPanel(vm, out hexTextBox));
@@ -173,15 +173,22 @@ public class ColorPickerWindow : Window
         return mainGrid;
     }
 
-    private static StackPanel CreateRgbPanel(ColorPickerViewModel vm, out TextBox hexInputTextBox)
+    private static Grid CreateRgbPanel(ColorPickerViewModel vm, out TextBox hexInputTextBox)
     {
-        var panel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 15 };
+        var panel = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto, Auto, Auto"),
+            ColumnSpacing = 15
+        };
 
         var redInput = MakeNumericUpDown(vm, "R:", nameof(vm.Red), 0, 255);
         var greenInput = MakeNumericUpDown(vm, "G:", nameof(vm.Green), 0, 255);
         var blueInput = MakeNumericUpDown(vm, "B:", nameof(vm.Blue), 0, 255);
 
-        // We only use the input numeric part from MakeNumericUpDown which returns a StackPanel
+        Grid.SetColumn(redInput, 0);
+        Grid.SetColumn(greenInput, 1);
+        Grid.SetColumn(blueInput, 2);
+
         panel.Children.Add(redInput);
         panel.Children.Add(greenInput);
         panel.Children.Add(blueInput);
@@ -367,6 +374,8 @@ public class ColorPickerWindow : Window
         panel.Children.Add(new TextBlock { Text = label, VerticalAlignment = VerticalAlignment.Center, Width = 20 });
 
         var num = UiUtil.MakeNumericUpDownInt(min, max, 0, 60, vm, propertyName);
+        num.MinWidth = 65;
+        num.MinHeight = 30;
         panel.Children.Add(num);
         return panel;
     }
