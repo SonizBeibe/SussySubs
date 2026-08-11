@@ -116,7 +116,7 @@ public class KaraokeBarControl : Grid
                     Text = displaySyllableText,
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    LetterSpacing = 2
+                    LetterSpacing = 16
                 };
                 stack.Children.Add(textBlock);
 
@@ -131,7 +131,7 @@ public class KaraokeBarControl : Grid
 
                 int currentStringIndex = start;
                 int currentMatchIndex = i;
-                border.PointerPressed += (s, e) => OnSyllableClicked(currentStringIndex, rawSyllableText, currentMatchIndex, e, border);
+                border.PointerPressed += (s, e) => OnSyllableClicked(currentStringIndex, rawSyllableText, currentMatchIndex, e, border, textBlock);
 
                 border.PointerMoved += (s, e) =>
                 {
@@ -168,7 +168,7 @@ public class KaraokeBarControl : Grid
         }
     }
 
-    private void OnSyllableClicked(int startIdx, string text, int matchIndex, PointerPressedEventArgs e, Border border)
+    private void OnSyllableClicked(int startIdx, string text, int matchIndex, PointerPressedEventArgs e, Border border, TextBlock? textBlock = null)
     {
         if (_vm?.SelectedSubtitle == null) return;
         var tag = GetTag();
@@ -238,11 +238,30 @@ public class KaraokeBarControl : Grid
             return; // Do not insert \k0 tags before the first valid tag
         }
 
-        double charRatio = border.Bounds.Width > 0 ? e.GetPosition(border).X / border.Bounds.Width : 0.5;
-        charRatio = System.Math.Max(0.0, System.Math.Min(1.0, charRatio));
-
         var cleanSyllableText = Regex.Replace(text, @"\{[^}]*\}", "");
-        int targetCleanIndex = (int)System.Math.Round(cleanSyllableText.Length * charRatio);
+
+        int targetCleanIndex = 0;
+
+        if (textBlock != null && textBlock.TextLayout != null)
+        {
+            var pos = e.GetPosition(textBlock);
+
+            // Adjust position for layout hit testing since it's zero-based on the TextLayout,
+            // while e.GetPosition might return negative or overflowing coordinates if they clicked the margins/padding
+            pos = new Point(System.Math.Max(0, System.Math.Min(textBlock.Bounds.Width, pos.X)),
+                            System.Math.Max(0, System.Math.Min(textBlock.Bounds.Height, pos.Y)));
+
+            var hit = textBlock.TextLayout.HitTestPoint(pos);
+            targetCleanIndex = hit.IsTrailing ? hit.TextPosition + 1 : hit.TextPosition;
+            targetCleanIndex = System.Math.Min(targetCleanIndex, cleanSyllableText.Length);
+        }
+        else
+        {
+            double charRatio = border.Bounds.Width > 0 ? e.GetPosition(border).X / border.Bounds.Width : 0.5;
+            charRatio = System.Math.Max(0.0, System.Math.Min(1.0, charRatio));
+            targetCleanIndex = (int)System.Math.Round(cleanSyllableText.Length * charRatio);
+        }
+
         int cleanCount = 0;
         int rawInsertIndex = startIdx;
         bool insideTag = false;
