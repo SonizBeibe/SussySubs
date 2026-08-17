@@ -114,6 +114,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int? _timeCodeUpDownStepMs;
     [ObservableProperty] private bool _promptBeforeDelete;
     [ObservableProperty] private bool _lockTimeCodes;
+    [ObservableProperty] private bool _allowWindowResizing;
     [ObservableProperty] private bool _rememberPositionAndSize;
     [ObservableProperty] private bool _openLastFileOnStart;
     [ObservableProperty]
@@ -726,6 +727,7 @@ public partial class SettingsViewModel : ObservableObject
         TimeCodeUpDownStepMs = general.TimeCodeUpDownStepMs;
         PromptBeforeDelete = general.PromptBeforeDelete;
         LockTimeCodes = general.LockTimeCodes;
+        AllowWindowResizing = general.AllowWindowResizing;
         RememberPositionAndSize = general.RememberPositionAndSize;
         OpenLastFileOnStart = Se.Settings.File.OpenLastFileOnStart;
         AutoSave = general.AutoSave;
@@ -1567,6 +1569,7 @@ public partial class SettingsViewModel : ObservableObject
         general.TimeCodeUpDownStepMs = TimeCodeUpDownStepMs ?? general.TimeCodeUpDownStepMs;
         general.PromptBeforeDelete = PromptBeforeDelete;
         general.LockTimeCodes = LockTimeCodes;
+        general.AllowWindowResizing = AllowWindowResizing;
         general.RememberPositionAndSize = RememberPositionAndSize;
         Se.Settings.File.OpenLastFileOnStart = OpenLastFileOnStart;
         general.AutoSave = AutoSave;

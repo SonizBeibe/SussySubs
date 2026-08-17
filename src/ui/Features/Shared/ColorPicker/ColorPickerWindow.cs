@@ -18,9 +18,9 @@ public class ColorPickerWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.ColorPickerTitle;
-        CanResize = false;
-        Width = 750;
-        Height = 450;
+        CanResize = Se.Settings.General.AllowWindowResizing;
+        MinWidth = 750;
+        MinHeight = 450;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         vm.Window = this;
         DataContext = vm;
@@ -39,7 +39,7 @@ public class ColorPickerWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
-            Margin = new Thickness(15),
+            Margin = new Thickness(15, 15, 15, 25),
             RowSpacing = 10,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -57,7 +57,7 @@ public class ColorPickerWindow : Window
     {
         var mainGrid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
             RowDefinitions = new RowDefinitions("*"),
             Margin = new Thickness(15),
             ColumnSpacing = 20
@@ -81,15 +81,17 @@ public class ColorPickerWindow : Window
 
         var visualGrid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto,10,Auto,10,Auto"),
-            RowDefinitions = new RowDefinitions("Auto")
+            ColumnDefinitions = new ColumnDefinitions("*,10,Auto,10,Auto"),
+            RowDefinitions = new RowDefinitions("*")
         };
 
         // Large 2D color spectrum
         var colorSpectrum = new ColorSpectrumControl
         {
-            Width = 256,
-            Height = 256,
+            MinWidth = 256,
+            MinHeight = 256,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch
         };
         colorSpectrum.Bind(ColorSpectrumControl.HueProperty, new Binding(nameof(vm.Hue)) { Mode = BindingMode.TwoWay });
         colorSpectrum.Bind(ColorSpectrumControl.SaturationProperty, new Binding(nameof(vm.HsvSaturation)) { Mode = BindingMode.TwoWay });
@@ -101,6 +103,7 @@ public class ColorPickerWindow : Window
         {
             Width = 30,
             Height = 256,
+            VerticalAlignment = VerticalAlignment.Stretch
         };
         hueSlider.Bind(HueSliderControl.HueProperty, new Binding(nameof(vm.Hue)) { Mode = BindingMode.TwoWay });
         Grid.SetColumn(hueSlider, 2);
@@ -110,6 +113,7 @@ public class ColorPickerWindow : Window
         {
             Width = 30,
             Height = 256,
+            VerticalAlignment = VerticalAlignment.Stretch
         };
         alphaSlider.Bind(AlphaSliderControl.AlphaProperty, new Binding(nameof(vm.Alpha)) { Mode = BindingMode.TwoWay });
         alphaSlider.Bind(AlphaSliderControl.BaseColorProperty, new Binding(nameof(vm.SelectedColor)) { Mode = BindingMode.OneWay });
