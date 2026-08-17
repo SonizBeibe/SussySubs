@@ -65,6 +65,7 @@ public class SeGeneral
     public int TimeCodeUpDownStepMs { get; set; }
     public bool PromptBeforeDelete { get; set; }
     public bool LockTimeCodes { get; set; }
+    public bool AllowWindowResizing { get; set; } = true;
     public bool RememberPositionAndSize { get; set; }
     public bool UndockVideoControls { get; set; }
     public List<SeWindowPosition> WindowPositions { get; set; } = new List<SeWindowPosition>();

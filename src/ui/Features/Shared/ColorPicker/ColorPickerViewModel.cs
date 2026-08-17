@@ -300,11 +300,11 @@ public partial class ColorPickerViewModel : ObservableObject
 
         if (ShowAlpha)
         {
-            AssaString = $"&H{SelectedColor.A:X2}{SelectedColor.B:X2}{SelectedColor.G:X2}{SelectedColor.R:X2}";
+            AssaString = $"&H{SelectedColor.A:X2}{SelectedColor.B:X2}{SelectedColor.G:X2}{SelectedColor.R:X2}&";
         }
         else
         {
-            AssaString = $"&H{SelectedColor.B:X2}{SelectedColor.G:X2}{SelectedColor.R:X2}";
+            AssaString = $"&H{SelectedColor.B:X2}{SelectedColor.G:X2}{SelectedColor.R:X2}&";
         }
     }
 
@@ -446,7 +446,7 @@ public partial class ColorPickerViewModel : ObservableObject
     {
         double r = 0, g = 0, b = 0;
 
-        var h = ((double)hue / 255 * 360) % 360;
+        var h = (double)(hue % 360);
         var s = (double)saturation / 100;
         var v = (double)value / 100;
 
