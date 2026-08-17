@@ -151,22 +151,10 @@ public class ColorPickerWindow : Window
         var rgbGroup = MakeGroupBox("RGB", CreateRgbPanel(vm, out hexTextBox));
         var formatsGroup = MakeGroupBox("Output Formats", CreateFormatsPanel(vm));
 
-        var hslHsvPanel = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 10,
-            Children =
-            {
-                MakeGroupBox("HSL", CreateHslPanel(vm)),
-                MakeGroupBox("HSV", CreateHsvPanel(vm))
-            }
-        };
-
         var toolsGroup = MakeGroupBox("Tools & Palette", CreateToolsPanel(vm));
 
         rightPanel.Children.Add(rgbGroup);
         rightPanel.Children.Add(formatsGroup);
-        rightPanel.Children.Add(hslHsvPanel);
         rightPanel.Children.Add(toolsGroup);
 
         Grid.SetColumn(rightPanel, 1);
@@ -199,24 +187,6 @@ public class ColorPickerWindow : Window
 
         hexInputTextBox = new TextBox(); // Placeholder since we returned out parameter
 
-        return panel;
-    }
-
-    private static StackPanel CreateHslPanel(ColorPickerViewModel vm)
-    {
-        var panel = new StackPanel { Orientation = Orientation.Vertical, Spacing = 5 };
-        panel.Children.Add(MakeNumericUpDown(vm, "H:", nameof(vm.Hue), 0, 360));
-        panel.Children.Add(MakeNumericUpDown(vm, "S:", nameof(vm.HslSaturation), 0, 100));
-        panel.Children.Add(MakeNumericUpDown(vm, "L:", nameof(vm.Lightness), 0, 100));
-        return panel;
-    }
-
-    private static StackPanel CreateHsvPanel(ColorPickerViewModel vm)
-    {
-        var panel = new StackPanel { Orientation = Orientation.Vertical, Spacing = 5 };
-        panel.Children.Add(MakeNumericUpDown(vm, "H:", nameof(vm.Hue), 0, 360)); // Bind to same Hue
-        panel.Children.Add(MakeNumericUpDown(vm, "S:", nameof(vm.HsvSaturation), 0, 100)); // Same Sat
-        panel.Children.Add(MakeNumericUpDown(vm, "V:", nameof(vm.Value), 0, 100));
         return panel;
     }
 
@@ -378,6 +348,7 @@ public class ColorPickerWindow : Window
         panel.Children.Add(new TextBlock { Text = label, VerticalAlignment = VerticalAlignment.Center, Width = 20 });
 
         var num = UiUtil.MakeNumericUpDownInt(min, max, 0, 60, vm, propertyName);
+        num.ShowButtonSpinner = false;
         num.MinWidth = 65;
         num.MinHeight = 30;
         panel.Children.Add(num);
