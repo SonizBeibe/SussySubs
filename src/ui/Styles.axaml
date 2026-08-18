@@ -1,7 +1,7 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:logic="clr-namespace:Nikse.SubtitleEdit.Logic;assembly=SubtitleEdit"
-        xmlns:seControls="clr-namespace:Nikse.SubtitleEdit.Controls;assembly=SubtitleEdit">
+        xmlns:logic="clr-namespace:Nikse.SubtitleEdit.Logic;assembly=SussySubs"
+        xmlns:seControls="clr-namespace:Nikse.SubtitleEdit.Controls;assembly=SussySubs">
     <Styles.Resources>
         <!-- Formerly supplied by the retired Avalonia.Controls.DataGrid theme; the
              TableView header theme still resolves this key (and SE's custom themes

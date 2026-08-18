@@ -71,7 +71,7 @@ public class EmbeddedAssetsTests
     {
         foreach (var name in GeneratedZips)
         {
-            using var stream = AssetLoader.Open(new Uri($"avares://SubtitleEdit/Assets/{name}"));
+            using var stream = AssetLoader.Open(new Uri($"avares://SussySubs/Assets/{name}"));
             using var zip = new ZipArchive(stream, ZipArchiveMode.Read);
 
             Assert.True(zip.Entries.Count > 0, $"{name} is embedded but contains no entries.");
@@ -91,7 +91,7 @@ public class EmbeddedAssetsTests
             .OrderBy(f => f, StringComparer.Ordinal)
             .ToList();
 
-        using var stream = AssetLoader.Open(new Uri("avares://SubtitleEdit/Assets/Languages.zip"));
+        using var stream = AssetLoader.Open(new Uri("avares://SussySubs/Assets/Languages.zip"));
         using var zip = new ZipArchive(stream, ZipArchiveMode.Read);
         var inZip = zip.Entries
             .Select(e => e.FullName)
@@ -123,7 +123,7 @@ public class EmbeddedAssetsTests
         const string prefix = "/Assets/";
 
         return AssetLoader
-            .GetAssets(new Uri("avares://SubtitleEdit/Assets"), null)
+            .GetAssets(new Uri("avares://SussySubs/Assets"), null)
             .Select(uri => Uri.UnescapeDataString(uri.AbsolutePath))
             .Where(p => p.StartsWith(prefix, StringComparison.Ordinal))
             .Select(p => p[prefix.Length..])

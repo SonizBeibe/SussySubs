@@ -78,7 +78,7 @@ public class OcrInitializer(IZipUnpacker zipUnpacker) : IOcrInitializer
 
     private async Task Unpack()
     {
-        var zipUri = new Uri("avares://SubtitleEdit/Assets/Ocr.zip");
+        var zipUri = new Uri("avares://SussySubs/Assets/Ocr.zip");
         await using var zipStream = AssetLoader.Open(zipUri);
         zipUnpacker.UnpackZipStream(zipStream, Se.OcrFolder);
     }

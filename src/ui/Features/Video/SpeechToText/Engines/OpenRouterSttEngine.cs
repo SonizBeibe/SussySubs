@@ -67,7 +67,7 @@ public class OpenRouterSttEngine : IOnlineSttEngine
 
     public async Task<string> GetHelpText()
     {
-        var uri = new Uri("avares://SubtitleEdit/Assets/SpeechToText/OpenRouter.txt");
+        var uri = new Uri("avares://SussySubs/Assets/SpeechToText/OpenRouter.txt");
         try
         {
             await using var stream = AssetLoader.Open(uri);

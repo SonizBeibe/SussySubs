@@ -56,7 +56,7 @@ public class NetflixCheckGlyph : INetflixQualityChecker
 
     private static async Task Unpack()
     {
-        var zipUri = new Uri("avares://SubtitleEdit/Assets/NetflixGlyphs.zip");
+        var zipUri = new Uri("avares://SussySubs/Assets/NetflixGlyphs.zip");
         await using var zipStream = AssetLoader.Open(zipUri);
         var zipUnpacker = new ZipUnpacker();
         zipUnpacker.UnpackZipStream(zipStream, Se.DataFolder);

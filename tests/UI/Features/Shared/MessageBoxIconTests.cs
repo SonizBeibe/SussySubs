@@ -63,7 +63,7 @@ public class MessageBoxIconTests
 
     private static HashSet<string> GetThemeZipEntries()
     {
-        using var stream = AssetLoader.Open(new Uri("avares://SubtitleEdit/Assets/Themes.zip"));
+        using var stream = AssetLoader.Open(new Uri("avares://SussySubs/Assets/Themes.zip"));
         using var zip = new ZipArchive(stream, ZipArchiveMode.Read);
         return zip.Entries.Select(e => e.FullName).ToHashSet(StringComparer.Ordinal);
     }

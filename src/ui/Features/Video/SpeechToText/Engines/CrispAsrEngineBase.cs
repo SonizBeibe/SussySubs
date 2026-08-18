@@ -67,8 +67,8 @@ public abstract class CrispAsrEngineBase : ICrispAsrEngine
         // matching .txt would throw straight into the caller's RelayCommand. Fall back to the
         // shared text instead - missing help is not worth taking the dialog down for.
         var assetName = $"{Name.Replace(" ", string.Empty)}.txt";
-        var uri = new Uri($"avares://SubtitleEdit/Assets/SpeechToText/{assetName}");
-        var commonUri = new Uri("avares://SubtitleEdit/Assets/SpeechToText/CrispASRCommon.txt");
+        var uri = new Uri($"avares://SussySubs/Assets/SpeechToText/{assetName}");
+        var commonUri = new Uri("avares://SussySubs/Assets/SpeechToText/CrispASRCommon.txt");
 
         var header = string.Empty;
         try

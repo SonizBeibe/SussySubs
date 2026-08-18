@@ -7,10 +7,12 @@
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-		<AssemblyName>SubtitleEdit</AssemblyName>
+		<AssemblyName>SussySubs</AssemblyName>
 		<RootNamespace>Nikse.SubtitleEdit</RootNamespace>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<ApplicationIcon>SE.ico</ApplicationIcon>
+		<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+		<Product>SussySubs</Product>
+		<Title>SussySubs</Title>
 	</PropertyGroup>
 	<ItemGroup>
 	  <AvaloniaXaml Remove="Assets\Themes\**" />

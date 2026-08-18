@@ -280,7 +280,7 @@ public partial class GetDictionariesViewModel : ObservableObject, IClosingCleanu
 
     private void LoadDictionaries()
     {
-        var uri = new Uri("avares://SubtitleEdit/Assets/HunspellDictionaries.json");
+        var uri = new Uri("avares://SussySubs/Assets/HunspellDictionaries.json");
         using var stream = AssetLoader.Open(uri);
         var options = new JsonSerializerOptions
         {

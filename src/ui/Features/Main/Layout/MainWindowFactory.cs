@@ -15,7 +15,7 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 /// </summary>
 public static class MainWindowFactory
 {
-    public const string AppName = "Subtitle Edit";
+    public const string AppName = "SussySubs";
 
     // Open main editor windows. The process force-exits when the last one closes: under
     // ShutdownMode.OnLastWindowClose a single stray helper window (e.g. a leaked

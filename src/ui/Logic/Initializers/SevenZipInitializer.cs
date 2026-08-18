@@ -99,7 +99,7 @@ public class SevenZipInitializer() : ISevenZipInitializer
                 Directory.CreateDirectory(outputDir);
             }
 
-            var zipUri = new Uri("avares://SubtitleEdit/Assets/SevenZip/7zaWindows64.zip");
+            var zipUri = new Uri("avares://SussySubs/Assets/SevenZip/7zaWindows64.zip");
             await using var zipStream = AssetLoader.Open(zipUri);
             var zipUnpacker = new ZipUnpacker();
             zipUnpacker.UnpackZipStream(zipStream, outputDir);
@@ -122,7 +122,7 @@ public class SevenZipInitializer() : ISevenZipInitializer
                 Directory.CreateDirectory(outputDir);
             }
 
-            var zipUri = new Uri("avares://SubtitleEdit/Assets/SevenZip/7zrLinux64.zip");
+            var zipUri = new Uri("avares://SussySubs/Assets/SevenZip/7zrLinux64.zip");
             await using var zipStream = AssetLoader.Open(zipUri);
             var zipUnpacker = new ZipUnpacker();
             zipUnpacker.UnpackZipStream(zipStream, outputDir);

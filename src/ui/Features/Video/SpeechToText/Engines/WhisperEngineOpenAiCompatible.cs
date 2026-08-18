@@ -94,7 +94,7 @@ public class OpenAiCompatibleSttEngine : IOnlineSttEngine
     public async Task<string> GetHelpText()
     {
         var assetName = $"{StaticName.Replace(" ", string.Empty)}.txt";
-        var uri = new Uri($"avares://SubtitleEdit/Assets/SpeechToText/{assetName}");
+        var uri = new Uri($"avares://SussySubs/Assets/SpeechToText/{assetName}");
 
         try
         {

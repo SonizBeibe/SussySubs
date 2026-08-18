@@ -46,7 +46,7 @@ public class MistralSpeech : ITtsEngine
         var voiceFileName = Path.Combine(mistralFolder, JsonFileName);
         if (!File.Exists(voiceFileName))
         {
-            var uri = new Uri("avares://SubtitleEdit/Assets/TextToSpeech/MistralVoices.json");
+            var uri = new Uri("avares://SussySubs/Assets/TextToSpeech/MistralVoices.json");
             using var stream = AssetLoader.Open(uri);
             using var fileStream = File.Create(voiceFileName);
             stream.CopyTo(fileStream);
