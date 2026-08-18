@@ -7,6 +7,7 @@
 [![Documentation](https://img.shields.io/badge/Docs-Read_Here-8E75B2?style=flat-square)](http://subtitleedit.github.io/subtitleedit/)
 [![Releases](https://img.shields.io/badge/Builds-Automated-F7DF1E?style=flat-square&logo=github&logoColor=black)](https://github.com/SubtitleEdit/subtitleedit/releases)
 [![Privacy](https://img.shields.io/badge/Privacy-100%25_Offline-success?style=flat-square)](#🔒-privacy)
+[![Discord Support](https://img.shields.io/badge/Discord-Join_Server-7289DA?style=flat-square&logo=discord&logoColor=white)](TU_ENLACE_DE_DISCORD_AQUI)
 
 *A free, open-source application to create, edit, synchronize, and translate video subtitles. Give yourself full control over your files — your data stays yours.*
 
@@ -96,16 +97,4 @@ As versões que fornecemos são independentes e **não requerem uma instalação
 
 ### 🔒 Privacidade
 
-**SussySubs** é um aplicativo de código aberto e offline.
-Se você optar por usar serviços online opcionais de terceiros dentro do aplicativo (como tradução, fala para texto, texto para fala, OCR ou dicionários), apenas os dados mínimos necessários para realizar essa solicitação específica são enviados diretamente ao provedor selecionado. Qualquer transferência de dados desse tipo é regida pela política de privacidade desse provedor, e não retemos ou encaminhamos esses dados de forma alguma.
-
-### 🏆 Suporte e Criadores Originais
-
-Este projeto é uma versão personalizada/fork baseada no trabalho incrível dos criadores originais do **Subtitle Edit**. Se você deseja apoiar o desenvolvimento contínuo do motor principal, considere doar diretamente ao desenvolvedor original:
-* [GitHub Sponsors (@niksedk)](https://github.com/sponsors/niksedk)
-* [Doar via PayPal](https://www.paypal.com/donate/?hosted_button_id=4XEHVLANCQBCU)
-
-<br>
-<div align="center">
-  <p>Read the official documentation at <strong><a href="http://subtitleedit.github.io/subtitleedit/">subtitleedit.github.io</a></strong></p>
-</div>
+**SussySubs
