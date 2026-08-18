@@ -396,18 +396,18 @@ public partial class SettingsViewModel : ObservableObject
 
     public ObservableCollection<FileTypeAssociationViewModel> FileTypeAssociations { get; set; } = new()
     {
-        new() { Extension = ".ass", IconPath = "avares://SubtitleEdit/Assets/FileTypes/ass.ico" },
-        new() { Extension = ".dfxp", IconPath = "avares://SubtitleEdit/Assets/FileTypes/dfxp.ico" },
-        new() { Extension = ".itt", IconPath = "avares://SubtitleEdit/Assets/FileTypes/itt.ico" },
-        new() { Extension = ".lrc", IconPath = "avares://SubtitleEdit/Assets/FileTypes/lrc.ico" },
-        new() { Extension = ".sbv", IconPath = "avares://SubtitleEdit/Assets/FileTypes/sbv.ico" },
-        new() { Extension = ".smi", IconPath = "avares://SubtitleEdit/Assets/FileTypes/smi.ico" },
-        new() { Extension = ".srt", IconPath = "avares://SubtitleEdit/Assets/FileTypes/srt.ico" },
-        new() { Extension = ".ssa", IconPath = "avares://SubtitleEdit/Assets/FileTypes/ssa.ico" },
-        new() { Extension = ".stl", IconPath = "avares://SubtitleEdit/Assets/FileTypes/stl.ico" },
-        new() { Extension = ".sub", IconPath = "avares://SubtitleEdit/Assets/FileTypes/sub.ico" },
-        new() { Extension = ".sup", IconPath = "avares://SubtitleEdit/Assets/FileTypes/sup.ico" },
-        new() { Extension = ".vtt", IconPath = "avares://SubtitleEdit/Assets/FileTypes/vtt.ico" },
+        new() { Extension = ".ass", IconPath = "avares://SussySubs/Assets/FileTypes/ass.ico" },
+        new() { Extension = ".dfxp", IconPath = "avares://SussySubs/Assets/FileTypes/dfxp.ico" },
+        new() { Extension = ".itt", IconPath = "avares://SussySubs/Assets/FileTypes/itt.ico" },
+        new() { Extension = ".lrc", IconPath = "avares://SussySubs/Assets/FileTypes/lrc.ico" },
+        new() { Extension = ".sbv", IconPath = "avares://SussySubs/Assets/FileTypes/sbv.ico" },
+        new() { Extension = ".smi", IconPath = "avares://SussySubs/Assets/FileTypes/smi.ico" },
+        new() { Extension = ".srt", IconPath = "avares://SussySubs/Assets/FileTypes/srt.ico" },
+        new() { Extension = ".ssa", IconPath = "avares://SussySubs/Assets/FileTypes/ssa.ico" },
+        new() { Extension = ".stl", IconPath = "avares://SussySubs/Assets/FileTypes/stl.ico" },
+        new() { Extension = ".sub", IconPath = "avares://SussySubs/Assets/FileTypes/sub.ico" },
+        new() { Extension = ".sup", IconPath = "avares://SussySubs/Assets/FileTypes/sup.ico" },
+        new() { Extension = ".vtt", IconPath = "avares://SussySubs/Assets/FileTypes/vtt.ico" },
     };
 
     public bool OkPressed { get; set; }

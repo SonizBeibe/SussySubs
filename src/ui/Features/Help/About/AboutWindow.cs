@@ -53,7 +53,7 @@ public class AboutWindow : Window
         var bitmaps = new Bitmap[imageNames.Length];
         for (var i = 0; i < imageNames.Length; i++)
         {
-            var assetUri = new Uri($"avares://SubtitleEdit/Assets/{imageNames[i]}");
+            var assetUri = new Uri($"avares://SussySubs/Assets/{imageNames[i]}");
             bitmaps[i] = new Bitmap(AssetLoader.Open(assetUri));
         }
 

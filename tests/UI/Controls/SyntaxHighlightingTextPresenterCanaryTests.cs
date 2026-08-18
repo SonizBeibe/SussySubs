@@ -21,7 +21,7 @@ public class SyntaxHighlightingTextPresenterCanaryTests
 {
     private static (Window window, SyntaxHighlightingTextBox textBox) ShowTextBox(string text)
     {
-        var styles = (Styles)AvaloniaXamlLoader.Load(new Uri("avares://SubtitleEdit/Styles.axaml"));
+        var styles = (Styles)AvaloniaXamlLoader.Load(new Uri("avares://SussySubs/Styles.axaml"));
         var textBox = new SyntaxHighlightingTextBox
         {
             Text = text,

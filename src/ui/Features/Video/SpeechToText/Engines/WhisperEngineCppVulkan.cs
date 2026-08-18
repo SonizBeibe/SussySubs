@@ -141,7 +141,7 @@ public class WhisperEngineCppVulkan : ISpeechToTextEngine
     public async Task<string> GetHelpText()
     {
         var assetName = $"{StaticName.Replace(" ", string.Empty)}.txt";
-        var uri = new Uri($"avares://SubtitleEdit/Assets/SpeechToText/{assetName}");
+        var uri = new Uri($"avares://SussySubs/Assets/SpeechToText/{assetName}");
 
         await using var stream = AssetLoader.Open(uri);
         using var reader = new StreamReader(stream);

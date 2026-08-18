@@ -2027,7 +2027,7 @@ public static class UiUtil
 
     public static WindowIcon? GetSeIcon()
     {
-        return new WindowIcon(AssetLoader.Open(new Uri("avares://SubtitleEdit/Assets/se.ico")));
+        return new WindowIcon(AssetLoader.Open(new Uri("avares://SussySubs/Assets/icon.ico")));
     }
 
     public static Control RemoveControlFromParent(this Control control)

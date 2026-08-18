@@ -32,7 +32,7 @@ public class ThemeInitializer(IZipUnpacker zipUnpacker) : IThemeInitializer
         try
         {
             Se.LogError($"Theme image \"{missingFileName}\" missing - re-unpacking Themes.zip to \"{Se.ThemesFolder}\"");
-            var zipUri = new Uri("avares://SubtitleEdit/Assets/Themes.zip");
+            var zipUri = new Uri("avares://SussySubs/Assets/Themes.zip");
             using var zipStream = AssetLoader.Open(zipUri);
             new Compression.ZipUnpacker().UnpackZipStream(zipStream, Se.ThemesFolder);
             WriteNewVersionFile();
@@ -103,7 +103,7 @@ public class ThemeInitializer(IZipUnpacker zipUnpacker) : IThemeInitializer
 
     private async Task Unpack()
     {
-        var zipUri = new Uri("avares://SubtitleEdit/Assets/Themes.zip");
+        var zipUri = new Uri("avares://SussySubs/Assets/Themes.zip");
         await using var zipStream = AssetLoader.Open(zipUri);
         zipUnpacker.UnpackZipStream(zipStream, Se.ThemesFolder);
     }

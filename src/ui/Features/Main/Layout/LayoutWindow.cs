@@ -38,7 +38,7 @@ public class LayoutWindow : Window
 
         for (var i = 1; i <= 12; i++)
         {
-            var uri = new Uri($"avares://SubtitleEdit/Assets/Layout/Layout{i:D2}.png");
+            var uri = new Uri($"avares://SussySubs/Assets/Layout/Layout{i:D2}.png");
 
             var image = new Image
             {

@@ -63,7 +63,7 @@ public class DashScopeQwen3SttEngine : IOnlineSttEngine
 
     public async Task<string> GetHelpText()
     {
-        var uri = new Uri("avares://SubtitleEdit/Assets/SpeechToText/AlibabaQwen3Asr.txt");
+        var uri = new Uri("avares://SussySubs/Assets/SpeechToText/AlibabaQwen3Asr.txt");
         try
         {
             await using var stream = AssetLoader.Open(uri);

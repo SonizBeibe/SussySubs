@@ -238,9 +238,9 @@ namespace Nikse.SubtitleEdit
                 b.Instance.Styles.Add(UiTheme.FluentTheme);
 
                 // Apply app-level style overrides
-                b.Instance.Styles.Add(new StyleInclude(new Uri("avares://SubtitleEdit/Styles.axaml", UriKind.Absolute))
+                b.Instance.Styles.Add(new StyleInclude(new Uri("avares://SussySubs/Styles.axaml", UriKind.Absolute))
                 {
-                    Source = new Uri("avares://SubtitleEdit/Styles.axaml")
+                    Source = new Uri("avares://SussySubs/Styles.axaml")
                 });
 
                 b.Instance.Styles.Add(new StyleInclude(new Uri("avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml", UriKind.Absolute))

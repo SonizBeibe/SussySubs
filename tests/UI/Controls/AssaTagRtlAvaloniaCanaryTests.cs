@@ -62,7 +62,7 @@ public class AssaTagRtlAvaloniaCanaryTests
     [AvaloniaFact]
     public void AssaTagBackslashStillRendersDisplacedInRtlLines()
     {
-        var styles = (Styles)AvaloniaXamlLoader.Load(new Uri("avares://SubtitleEdit/Styles.axaml"));
+        var styles = (Styles)AvaloniaXamlLoader.Load(new Uri("avares://SussySubs/Styles.axaml"));
         var textBox = new SyntaxHighlightingTextBox
         {
             Text = "{\\an8}هذا",

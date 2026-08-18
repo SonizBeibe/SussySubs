@@ -14,7 +14,7 @@ public interface ILanguageInitializer
 
 public class LanguageInitializer(IZipUnpacker zipUnpacker) : ILanguageInitializer
 {
-    private static readonly Uri LanguagesZipUri = new("avares://SubtitleEdit/Assets/Languages.zip");
+    private static readonly Uri LanguagesZipUri = new("avares://SussySubs/Assets/Languages.zip");
 
     public async Task UpdateLanguagesIfNeeded()
     {

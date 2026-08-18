@@ -19,8 +19,8 @@ public class ColorPickerWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.ColorPickerTitle;
         CanResize = Se.Settings.General.AllowWindowResizing;
-        MinWidth = 750;
-        MinHeight = 450;
+        Width = 550;
+        Height = 350;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         vm.Window = this;
         DataContext = vm;
