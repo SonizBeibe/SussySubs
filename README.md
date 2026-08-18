@@ -12,7 +12,7 @@
 
 <br>
 
-[🇺🇸 **Read in English**](#-english) &nbsp; | &nbsp; [🇪🇸 **Leer en Español**](#-español)
+[🇺🇸 **English**](#-english) &nbsp; | &nbsp; [🇪🇸 **Español**](#-español) &nbsp; | &nbsp; [🇧🇷 **Português**](#-português)
 
 <br>
 <hr>
@@ -74,6 +74,36 @@ Si decides utilizar servicios en línea opcionales de terceros dentro de la app 
 Este proyecto es una versión personalizada/fork basada en el increíble trabajo de los creadores originales de **Subtitle Edit**. Si deseas apoyar el desarrollo continuo del motor principal, por favor considera donar directamente al desarrollador original:
 * [GitHub Sponsors (@niksedk)](https://github.com/sponsors/niksedk)
 * [Donar vía PayPal](https://www.paypal.com/donate/?hosted_button_id=4XEHVLANCQBCU)
+
+<br>
+<hr>
+
+<h2 id="-português">🇧🇷 Documentação em Português</h2>
+
+> **A Visão:** Este projeto tem como objetivo dar a você controle total sobre seus arquivos de legendas e mídia.
+>
+> **A Realidade:** Todos os recursos principais, incluindo edição, conversão, reprodução de vídeo e backups automáticos locais, são executados nativamente no seu dispositivo. **Não** coleta, armazena, transmite ou analisa seu conteúdo (nem para métricas, nem para treinar modelos de IA, nem para qualquer outro propósito).
+
+### ⚙️ Requisitos do Sistema e Instalação
+
+As versões que fornecemos são independentes e **não requerem uma instalação separada do .NET**.
+👉 **[Baixe a versão mais recente para Windows aqui](https://github.com/SubtitleEdit/subtitleedit/releases)**
+
+#### 🪟 Windows
+* **Mínimo:** Windows 10 versão 22H2 (build 19045) ou superior, totalmente atualizado.
+* **Instalação:** Basta baixar o arquivo instalador `.exe` mais recente na guia Releases, executá-lo e seguir o assistente de instalação.
+* *Nota: Versões antigas do Windows 10 (2004/20H2/21H1/21H2) chegaram ao fim de sua vida útil e podem falhar ao iniciar com um erro de tempo de execução do .NET (`0x80131506`).*
+
+### 🔒 Privacidade
+
+**SussySubs** é um aplicativo de código aberto e offline.
+Se você optar por usar serviços online opcionais de terceiros dentro do aplicativo (como tradução, fala para texto, texto para fala, OCR ou dicionários), apenas os dados mínimos necessários para realizar essa solicitação específica são enviados diretamente ao provedor selecionado. Qualquer transferência de dados desse tipo é regida pela política de privacidade desse provedor, e não retemos ou encaminhamos esses dados de forma alguma.
+
+### 🏆 Suporte e Criadores Originais
+
+Este projeto é uma versão personalizada/fork baseada no trabalho incrível dos criadores originais do **Subtitle Edit**. Se você deseja apoiar o desenvolvimento contínuo do motor principal, considere doar diretamente ao desenvolvedor original:
+* [GitHub Sponsors (@niksedk)](https://github.com/sponsors/niksedk)
+* [Doar via PayPal](https://www.paypal.com/donate/?hosted_button_id=4XEHVLANCQBCU)
 
 <br>
 <div align="center">
