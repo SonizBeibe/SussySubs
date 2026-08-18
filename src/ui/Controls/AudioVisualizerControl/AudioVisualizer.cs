@@ -441,6 +441,18 @@ public class AudioVisualizer : Control
     /// <summary>Localized hint text drawn over the empty waveform (see <see cref="ShowClickToGenerateHint"/>).</summary>
     public string ClickToGenerateText { get; set; } = string.Empty;
 
+    static AudioVisualizer()
+    {
+        AffectsRender<AudioVisualizer>(
+            WavePeaksProperty,
+            StartPositionSecondsProperty,
+            ZoomFactorProperty,
+            VerticalZoomFactorProperty,
+            CurrentVideoPositionSecondsProperty,
+            AllSelectedParagraphsProperty,
+            IsKaraokeModeProperty);
+    }
+
     public AudioVisualizer()
     {
         // A right to left UI language sets the whole window to RightToLeft, which
@@ -454,15 +466,6 @@ public class AudioVisualizer : Control
         IsHitTestVisible = true;
         ClipToBounds = true;
         MenuFlyout = new MenuFlyout();
-
-        AffectsRender<AudioVisualizer>(
-            WavePeaksProperty,
-            StartPositionSecondsProperty,
-            ZoomFactorProperty,
-            VerticalZoomFactorProperty,
-            CurrentVideoPositionSecondsProperty,
-            AllSelectedParagraphsProperty,
-            IsKaraokeModeProperty);
 
         PointerMoved += OnPointerMoved;
         PointerEntered += OnPointerEntered;

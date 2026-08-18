@@ -79,6 +79,9 @@
 		<AvaloniaResource Include="Assets\SpeechToText\*.txt" />
 		<AvaloniaResource Include="Assets\TextToSpeech\*.json" />
 		<Content Include="SE.ico" />
+		<Content Include="ffmpeg.exe" Condition="Exists('ffmpeg.exe')">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
