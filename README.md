@@ -28,7 +28,7 @@
 ### ⚙️ System Requirements & Installation
 
 Our provided builds are self-contained and **do not require a separate .NET installation**. 
-👉 **[Download the latest Windows build here](https://github.com/SubtitleEdit/subtitleedit/releases)**
+👉 **[Download the latest Windows build here](https://github.com/SonizBeibe/SussySubs/releases/tag/v2.5.0b)**
 
 #### 🪟 Windows
 * **Minimum:** Windows 10 version 22H2 (build 19045) or newer, fully updated.
@@ -58,7 +58,7 @@ This project is a custom build/fork based on the amazing work of the original **
 ### ⚙️ Requisitos del Sistema e Instalación
 
 Las versiones que proporcionamos son independientes y **no requieren una instalación separada de .NET**.
-👉 **[Descarga la última versión para Windows aquí](https://github.com/SubtitleEdit/subtitleedit/releases)**
+👉 **[Descarga la última versión para Windows aquí](https://github.com/SonizBeibe/SussySubs/releases/tag/v2.5.0b)**
 
 #### 🪟 Windows
 * **Mínimo:** Windows 10 versión 22H2 (build 19045) o superior, totalmente actualizado.
@@ -88,7 +88,7 @@ Este proyecto es una versión personalizada/fork basada en el increíble trabajo
 ### ⚙️ Requisitos do Sistema e Instalação
 
 As versões que fornecemos são independentes e **não requerem uma instalação separada do .NET**.
-👉 **[Baixe a versão mais recente para Windows aqui](https://github.com/SubtitleEdit/subtitleedit/releases)**
+👉 **[Baixe a versão mais recente para Windows aqui](https://github.com/SonizBeibe/SussySubs/releases/tag/v2.5.0b)**
 
 #### 🪟 Windows
 * **Mínimo:** Windows 10 versão 22H2 (build 19045) ou superior, totalmente atualizado.
