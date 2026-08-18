@@ -1,9 +1,9 @@
 <div align="center">
 
-# 🎬 Subtitle Edit
+# 🎬 SussySubs
 **The ultimate subtitle editor. :)**
 
-[![Platform](https://img.shields.io/badge/Platform-Win_|_Mac_|_Linux-4285F4?style=flat-square)](#)
+[![Platform](https://img.shields.io/badge/Platform-Windows-4285F4?style=flat-square)](#)
 [![Documentation](https://img.shields.io/badge/Docs-Read_Here-8E75B2?style=flat-square)](http://subtitleedit.github.io/subtitleedit/)
 [![Releases](https://img.shields.io/badge/Builds-Automated-F7DF1E?style=flat-square&logo=github&logoColor=black)](https://github.com/SubtitleEdit/subtitleedit/releases)
 [![Privacy](https://img.shields.io/badge/Privacy-100%25_Offline-success?style=flat-square)](#🔒-privacy)
@@ -20,44 +20,28 @@
 
 <h2 id="-english">🇺🇸 English Documentation</h2>
 
-> **The Vision:** Subtitle Edit aims to give you full control over your subtitle files and media. 
+> **The Vision:** This project aims to give you full control over your subtitle files and media. 
 >
 > **The Reality:** All core features, including editing, converting, video playback, and local auto-backup, run entirely on your device. It does **not** collect, store, transmit, or analyze your content — not for analytics, not for model training, and not for any other secondary purpose.
 
 ### ⚙️ System Requirements & Installation
 
 Our provided builds are self-contained and **do not require a separate .NET installation**. 
-👉 **[Download the latest automated builds here](https://github.com/SubtitleEdit/subtitleedit/releases)**
+👉 **[Download the latest Windows build here](https://github.com/SubtitleEdit/subtitleedit/releases)**
 
 #### 🪟 Windows
 * **Minimum:** Windows 10 version 22H2 (build 19045) or newer, fully updated.
+* **Installation:** Simply download the latest Setup `.exe` file from the Releases tab, run it, and follow the installation wizard.
 * *Note: Older Windows 10 builds (2004/20H2/21H1/21H2) are end-of-life and may fail to start with a .NET runtime error (`0x80131506`).*
-
-#### 🍏 macOS
-* **Minimum:** macOS 12 (Monterey) or newer.
-* The `.dmg` is self-contained: `libmpv` and `ffmpeg` are bundled inside `Subtitle Edit.app`, so no MacPorts or Homebrew install is required.
-* **Installation (As of v5.1.0-rc13):** The `.dmg` is signed with an Apple Developer ID and notarized by Apple. Simply double-click the `.dmg`, drag `Subtitle Edit.app` into your `Applications` folder, and open it normally. No Terminal quarantine-removal step is needed.
-
-#### 🐧 Linux
-* **Flatpak (Recommended):** Bundles all required dependencies (mpv, ffmpeg). 
-    ```bash
-    flatpak install SubtitleEdit-linux-x64.flatpak
-    flatpak run dk.nikse.subtitleedit
-    ```
-* **Native Packages:** Requires `mpv` and `ffmpeg` to enable video functionality.
-    * **Debian/Ubuntu:** `sudo apt update && sudo apt install -y mpv libmpv-dev ffmpeg`
-    * **Arch:** `sudo pacman -S mpv ffmpeg`
-    * **Fedora:** `sudo dnf install mpv-libs ffmpeg`
-    * **openSUSE:** `sudo zypper install libmpv1 ffmpeg`
 
 ### 🔒 Privacy
 
-**Subtitle Edit** is an offline, open-source application. 
-If you choose to use optional third-party online services within Subtitle Edit (such as translation, speech-to-text, text-to-speech, OCR, or dictionary/lookups), only the minimal data required to perform that specific request is sent directly to the selected provider. Any such data transfer is governed by the provider’s own privacy policy, and Subtitle Edit does not retain or forward this data in any way.
+**SussySubs** is an offline, open-source application. 
+If you choose to use optional third-party online services within the app (such as translation, speech-to-text, text-to-speech, OCR, or dictionary/lookups), only the minimal data required to perform that specific request is sent directly to the selected provider. Any such data transfer is governed by the provider’s own privacy policy, and we do not retain or forward this data in any way.
 
 ### 🏆 Support & Original Creators
 
-This project exists thanks to its creator and contributors. If you’d like to support the continued development of Subtitle Edit, please consider donating directly to the original developer:
+This project is a custom build/fork based on the amazing work of the original **Subtitle Edit** creators. If you’d like to support the continued development of the core engine, please consider donating directly to the original developer:
 * [GitHub Sponsors (@niksedk)](https://github.com/sponsors/niksedk)
 * [Donate via PayPal](https://www.paypal.com/donate/?hosted_button_id=4XEHVLANCQBCU)
 
@@ -66,44 +50,28 @@ This project exists thanks to its creator and contributors. If you’d like to s
 
 <h2 id="-español">🇪🇸 Documentación en Español</h2>
 
-> **La Visión:** Subtitle Edit tiene como objetivo darte control total sobre tus archivos de subtítulos y multimedia.
+> **La Visión:** Este proyecto tiene como objetivo darte control total sobre tus archivos de subtítulos y multimedia.
 >
 > **La Realidad:** Todas las funciones principales, incluyendo edición, conversión, reproducción de video y copias de seguridad automáticas locales, se ejecutan de forma nativa en tu dispositivo. **No** recopila, almacena, transmite ni analiza tu contenido (ni para métricas, ni para entrenar modelos de IA, ni para ningún otro propósito).
 
 ### ⚙️ Requisitos del Sistema e Instalación
 
 Las versiones que proporcionamos son independientes y **no requieren una instalación separada de .NET**.
-👉 **[Descarga las últimas versiones automatizadas aquí](https://github.com/SubtitleEdit/subtitleedit/releases)**
+👉 **[Descarga la última versión para Windows aquí](https://github.com/SubtitleEdit/subtitleedit/releases)**
 
 #### 🪟 Windows
 * **Mínimo:** Windows 10 versión 22H2 (build 19045) o superior, totalmente actualizado.
+* **Instalación:** Simplemente descarga el archivo instalador `.exe` más reciente desde la pestaña de Releases, ejecútalo y sigue el asistente de instalación.
 * *Nota: Las versiones antiguas de Windows 10 (2004/20H2/21H1/21H2) han llegado al final de su vida útil y pueden fallar al iniciar con un error de ejecución de .NET (`0x80131506`).*
-
-#### 🍏 macOS
-* **Mínimo:** macOS 12 (Monterey) o superior.
-* El archivo `.dmg` es independiente: `libmpv` y `ffmpeg` ya vienen incluidos dentro de `Subtitle Edit.app`, por lo que no necesitas instalar MacPorts ni Homebrew.
-* **Instalación (Desde v5.1.0-rc13):** El `.dmg` está firmado con un Apple Developer ID y notarizado por Apple. Simplemente haz doble clic en el `.dmg`, arrastra `Subtitle Edit.app` a tu carpeta de `Aplicaciones` y ábrelo normalmente. No se requiere quitar la cuarentena desde la Terminal.
-
-#### 🐧 Linux
-* **Flatpak (Recomendado):** Incluye todas las dependencias requeridas (mpv, ffmpeg).
-    ```bash
-    flatpak install SubtitleEdit-linux-x64.flatpak
-    flatpak run dk.nikse.subtitleedit
-    ```
-* **Paquetes Nativos:** Requiere tener instalado `mpv` y `ffmpeg` para habilitar las funciones de video.
-    * **Debian/Ubuntu:** `sudo apt update && sudo apt install -y mpv libmpv-dev ffmpeg`
-    * **Arch:** `sudo pacman -S mpv ffmpeg`
-    * **Fedora:** `sudo dnf install mpv-libs ffmpeg`
-    * **openSUSE:** `sudo zypper install libmpv1 ffmpeg`
 
 ### 🔒 Privacidad
 
-**Subtitle Edit** es una aplicación de código abierto y fuera de línea.
-Si decides utilizar servicios en línea opcionales de terceros dentro de Subtitle Edit (como traducción, voz a texto, texto a voz, OCR o diccionarios), solo los datos mínimos requeridos para realizar esa solicitud específica se envían directamente al proveedor seleccionado. Cualquier transferencia de datos de este tipo se rige por la política de privacidad de dicho proveedor, y Subtitle Edit no retiene ni reenvía estos datos de ninguna manera.
+**SussySubs** es una aplicación de código abierto y fuera de línea.
+Si decides utilizar servicios en línea opcionales de terceros dentro de la app (como traducción, voz a texto, texto a voz, OCR o diccionarios), solo los datos mínimos requeridos para realizar esa solicitud específica se envían directamente al proveedor seleccionado. Cualquier transferencia de datos de este tipo se rige por la política de privacidad de dicho proveedor, y no retenemos ni reenviamos estos datos de ninguna manera.
 
 ### 🏆 Soporte y Creadores Originales
 
-Este proyecto existe gracias a su creador original y sus colaboradores. Si deseas apoyar el desarrollo continuo de Subtitle Edit, por favor considera donar directamente al desarrollador original:
+Este proyecto es una versión personalizada/fork basada en el increíble trabajo de los creadores originales de **Subtitle Edit**. Si deseas apoyar el desarrollo continuo del motor principal, por favor considera donar directamente al desarrollador original:
 * [GitHub Sponsors (@niksedk)](https://github.com/sponsors/niksedk)
 * [Donar vía PayPal](https://www.paypal.com/donate/?hosted_button_id=4XEHVLANCQBCU)
 
