@@ -19,11 +19,20 @@ public class ColorPickerWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.ColorPickerTitle;
         CanResize = Se.Settings.General.AllowWindowResizing;
-        Width = 550;
-        Height = 350;
+        Width = Se.Settings.General.ColorPickerWidth;
+        Height = Se.Settings.General.ColorPickerHeight;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         vm.Window = this;
         DataContext = vm;
+
+        Closing += (s, e) =>
+        {
+            if (Se.Settings.General.AllowWindowResizing)
+            {
+                Se.Settings.General.ColorPickerWidth = Width;
+                Se.Settings.General.ColorPickerHeight = Height;
+            }
+        };
 
         var colorView = MakeColorView(vm, out var hexTextBox);
 

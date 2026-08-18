@@ -67,6 +67,8 @@ public class SeGeneral
     public bool LockTimeCodes { get; set; }
     public bool AllowWindowResizing { get; set; } = true;
     public bool RememberPositionAndSize { get; set; }
+    public double ColorPickerWidth { get; set; } = 680;
+    public double ColorPickerHeight { get; set; } = 420;
     public bool UndockVideoControls { get; set; }
     public List<SeWindowPosition> WindowPositions { get; set; } = new List<SeWindowPosition>();
     public bool AutoSave { get; set; }
