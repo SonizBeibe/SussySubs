@@ -23124,7 +23124,7 @@ public partial class MainViewModel :
             }
         }
 
-        text = text + " - " + Se.Language.Title + " " + Se.Version;
+        text = text + " - SussySubs " + Se.Version;
         if (_changeSubtitleHash != mainHash)
         {
             text = "*" + text;
