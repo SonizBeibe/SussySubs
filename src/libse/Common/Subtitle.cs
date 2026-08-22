@@ -17,6 +17,9 @@ namespace Nikse.SubtitleEdit.Core.Common
         public string Header { get; set; } = string.Empty;
         public string Footer { get; set; } = string.Empty;
 
+        public int PlayResX { get; set; }
+        public int PlayResY { get; set; }
+
         public string FileName { get; set; }
 
         public SubtitleFormat OriginalFormat { get; set; }
@@ -54,6 +57,8 @@ namespace Nikse.SubtitleEdit.Core.Common
 
             Header = subtitle.Header;
             Footer = subtitle.Footer;
+            PlayResX = subtitle.PlayResX;
+            PlayResY = subtitle.PlayResY;
             FileName = subtitle.FileName;
             OriginalFormat = subtitle.OriginalFormat;
             OriginalEncoding = subtitle.OriginalEncoding;

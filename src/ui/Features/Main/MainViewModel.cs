@@ -16628,20 +16628,45 @@ public partial class MainViewModel :
 
             if (Se.Settings.Video.AutoOpen && skipLoadVideo == false)
             {
-                var assVideoFile = AdvancedSubStationAlpha.GetTagValueFromHeader("Video File", "[Script Info]", _subtitle.Header);
-                var assAudioFile = AdvancedSubStationAlpha.GetTagValueFromHeader("Audio File", "[Script Info]", _subtitle.Header);
+                var assVideoFile = AdvancedSubStationAlpha.GetTagValueFromHeader("Video File", "[Aegisub Project Garbage]", _subtitle.Header);
+                if (string.IsNullOrWhiteSpace(assVideoFile))
+                {
+                    assVideoFile = AdvancedSubStationAlpha.GetTagValueFromHeader("Video File", "[Script Info]", _subtitle.Header);
+                }
+
+                var assAudioFile = AdvancedSubStationAlpha.GetTagValueFromHeader("Audio File", "[Aegisub Project Garbage]", _subtitle.Header);
+                if (string.IsNullOrWhiteSpace(assAudioFile))
+                {
+                    assAudioFile = AdvancedSubStationAlpha.GetTagValueFromHeader("Audio File", "[Script Info]", _subtitle.Header);
+                }
+
+                string CleanAegisubGarbage(string? path)
+                {
+                    if (string.IsNullOrWhiteSpace(path)) return string.Empty;
+                    path = path.Trim();
+                    if (path.StartsWith("?dummy", StringComparison.OrdinalIgnoreCase) || path.StartsWith("?video", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return string.Empty;
+                    }
+                    return path;
+                }
+
+                assVideoFile = CleanAegisubGarbage(assVideoFile);
+                assAudioFile = CleanAegisubGarbage(assAudioFile);
+
                 string? headerVideoPath = null;
                 string? headerAudioPath = null;
 
                 try
                 {
+                    var baseDir = Path.GetDirectoryName(fileName) ?? string.Empty;
                     if (!string.IsNullOrWhiteSpace(assVideoFile))
                     {
-                        headerVideoPath = Path.Combine(Path.GetDirectoryName(fileName) ?? string.Empty, assVideoFile.Trim());
+                        headerVideoPath = Path.IsPathRooted(assVideoFile) ? assVideoFile : Path.GetFullPath(Path.Combine(baseDir, assVideoFile));
                     }
                     if (!string.IsNullOrWhiteSpace(assAudioFile))
                     {
-                        headerAudioPath = Path.Combine(Path.GetDirectoryName(fileName) ?? string.Empty, assAudioFile.Trim());
+                        headerAudioPath = Path.IsPathRooted(assAudioFile) ? assAudioFile : Path.GetFullPath(Path.Combine(baseDir, assAudioFile));
                     }
                 }
                 catch
@@ -16655,7 +16680,7 @@ public partial class MainViewModel :
 
                 if (linkedMediaFound)
                 {
-                    var answer = await Nikse.SubtitleEdit.Features.Shared.MessageBox.Show(Window,
+                    var answer = await Nikse.SubtitleEdit.Features.Shared.MessageBox.Show(Window!,
                         "Linked media files (Video/Audio) found for this script. Do you want to load them?",
                         "Load Linked Media?",
                         Nikse.SubtitleEdit.Features.Shared.MessageBoxButtons.YesNo,
@@ -16673,12 +16698,12 @@ public partial class MainViewModel :
 
                     if (!string.IsNullOrEmpty(headerAudioPath) && File.Exists(headerAudioPath) && headerAudioPath != headerVideoPath)
                     {
-                        await VideoOpenFile(headerAudioPath, desiredAudioTrackId);
+                        Dispatcher.UIThread.Post(() => LoadWaveformAndSpectrogram(headerAudioPath));
                     }
                 }
                 else if (userAgreedToLoadLinked && !string.IsNullOrEmpty(headerAudioPath) && File.Exists(headerAudioPath))
                 {
-                    await VideoOpenFile(headerAudioPath, desiredAudioTrackId);
+                    Dispatcher.UIThread.Post(() => LoadWaveformAndSpectrogram(headerAudioPath));
                 }
                 else if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
                 {
