@@ -1593,6 +1593,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
             string? videoFile = null;
             string? audioFile = null;
 
+            int playResXInt = 0;
+            int playResYInt = 0;
+
             var header = new StringBuilder();
             var footer = new StringBuilder();
             var textBuilder = new StringBuilder();
@@ -1610,10 +1613,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
                     if (trimmedLine.StartsWith("PlayResX:", StringComparison.OrdinalIgnoreCase))
                     {
                         playResX = line;
+                        int.TryParse(trimmedLine.Substring(9).Trim(), out playResXInt);
                     }
                     else if (trimmedLine.StartsWith("PlayResY:", StringComparison.OrdinalIgnoreCase))
                     {
                         playResY = line;
+                        int.TryParse(trimmedLine.Substring(9).Trim(), out playResYInt);
                     }
                     else if (trimmedLine.StartsWith("Video File:", StringComparison.OrdinalIgnoreCase))
                     {
@@ -1910,6 +1915,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
             {
                 subtitle.Footer = footer.ToString().Trim();
             }
+
+            subtitle.PlayResX = playResXInt;
+            subtitle.PlayResY = playResYInt;
 
             subtitle.Renumber();
             Errors = errors.ToString();
