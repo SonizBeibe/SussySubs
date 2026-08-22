@@ -846,6 +846,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
                     {
                         sectionOn = true;
                     }
+                    else
+                    {
+                        sectionOn = false;
+                    }
                 }
                 else if (sectionOn &&
                          s.StartsWith(tagName, StringComparison.OrdinalIgnoreCase) &&
@@ -1891,11 +1895,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
                 {
                     headerStr = AddTagToHeader("PlayResY", playResY, "[Script Info]", headerStr);
                 }
-                if (videoFile != null && GetTagValueFromHeader("Video File", "[Script Info]", headerStr) == null)
+                if (videoFile != null && GetTagValueFromHeader("Video File", "[Script Info]", headerStr) == null && GetTagValueFromHeader("Video File", "[Aegisub Project Garbage]", headerStr) == null)
                 {
                     headerStr = AddTagToHeader("Video File", videoFile, "[Script Info]", headerStr);
                 }
-                if (audioFile != null && GetTagValueFromHeader("Audio File", "[Script Info]", headerStr) == null)
+                if (audioFile != null && GetTagValueFromHeader("Audio File", "[Script Info]", headerStr) == null && GetTagValueFromHeader("Audio File", "[Aegisub Project Garbage]", headerStr) == null)
                 {
                     headerStr = AddTagToHeader("Audio File", audioFile, "[Script Info]", headerStr);
                 }
