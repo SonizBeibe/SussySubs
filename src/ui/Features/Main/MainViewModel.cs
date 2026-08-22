@@ -16649,7 +16649,25 @@ public partial class MainViewModel :
                     // Ignore path combination errors
                 }
 
-                if (!string.IsNullOrEmpty(headerVideoPath) && File.Exists(headerVideoPath))
+                bool linkedMediaFound = (!string.IsNullOrEmpty(headerVideoPath) && File.Exists(headerVideoPath)) ||
+                                        (!string.IsNullOrEmpty(headerAudioPath) && File.Exists(headerAudioPath));
+                bool userAgreedToLoadLinked = false;
+
+                if (linkedMediaFound)
+                {
+                    var answer = await Nikse.SubtitleEdit.Features.Shared.MessageBox.Show(Window,
+                        "Linked media files (Video/Audio) found for this script. Do you want to load them?",
+                        "Load Linked Media?",
+                        Nikse.SubtitleEdit.Features.Shared.MessageBoxButtons.YesNo,
+                        Nikse.SubtitleEdit.Features.Shared.MessageBoxIcon.Question);
+
+                    if (answer == Nikse.SubtitleEdit.Features.Shared.MessageBoxResult.Yes)
+                    {
+                        userAgreedToLoadLinked = true;
+                    }
+                }
+
+                if (userAgreedToLoadLinked && !string.IsNullOrEmpty(headerVideoPath) && File.Exists(headerVideoPath))
                 {
                     await VideoOpenFile(headerVideoPath, desiredAudioTrackId);
 
@@ -16658,7 +16676,7 @@ public partial class MainViewModel :
                         await VideoOpenFile(headerAudioPath, desiredAudioTrackId);
                     }
                 }
-                else if (!string.IsNullOrEmpty(headerAudioPath) && File.Exists(headerAudioPath))
+                else if (userAgreedToLoadLinked && !string.IsNullOrEmpty(headerAudioPath) && File.Exists(headerAudioPath))
                 {
                     await VideoOpenFile(headerAudioPath, desiredAudioTrackId);
                 }
@@ -24471,7 +24489,8 @@ public partial class MainViewModel :
 
     private bool _isDraggingPos = false;
     private bool _isVisualPosMode = false;
-
+    private int _dragStartX = -1;
+    private int _dragStartY = -1;
 
     [RelayCommand]
     private void ToggleVisualPosMode()
@@ -24480,6 +24499,54 @@ public partial class MainViewModel :
         if (VideoPlayerControl != null)
         {
             VideoPlayerControl.ClickToTogglePlay = !_isVisualPosMode;
+            var overlayGrid = VideoPlayerControl.VisualPosOverlayGrid;
+            if (overlayGrid != null)
+            {
+                overlayGrid.IsHitTestVisible = _isVisualPosMode;
+                if (_isVisualPosMode)
+                {
+                    overlayGrid.Background = Avalonia.Media.Brushes.Transparent; // Ensure it captures events
+
+                    if (SelectedSubtitle != null && IsFormatAssa)
+                    {
+                        var text = SelectedSubtitle.Text;
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(text, @"\\pos\(([\d\.]+),([\d\.]+)\)") &&
+                            !System.Text.RegularExpressions.Regex.IsMatch(text, @"\\move\(([\d\.]+),([\d\.]+),([\d\.]+),([\d\.]+)(?:,[^\)]*)?\)"))
+                        {
+                            double vidWidth = 0;
+                            double vidHeight = 0;
+
+                            var prx = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResX", "[Script Info]", _subtitle.Header);
+                            var pry = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResY", "[Script Info]", _subtitle.Header);
+                            if (double.TryParse(prx, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double prxVal) &&
+                                double.TryParse(pry, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double pryVal))
+                            {
+                                vidWidth = prxVal;
+                                vidHeight = pryVal;
+                            }
+
+                            if (vidWidth == 0 || vidHeight == 0)
+                            {
+                                vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
+                                vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
+                            }
+
+                            int x = (int)System.Math.Round(vidWidth / 2.0);
+                            int y = (int)System.Math.Round(vidHeight * 0.9);
+
+                            text = $"{{\\pos({x},{y})}}" + text;
+                            text = text.Replace("}{\\", "\\");
+                            SelectedSubtitle.Text = text;
+                            RefreshSubtitlePreview();
+                            SubtitleTextChanged(this, null!);
+                        }
+                    }
+                }
+                else
+                {
+                    overlayGrid.Background = null;
+                }
+            }
             UpdateVisualPosOverlay();
         }
     }
@@ -24513,15 +24580,35 @@ public partial class MainViewModel :
         if (SelectedSubtitle == null || !IsFormatAssa) return;
 
         var text = SelectedSubtitle.Text;
-        var match = System.Text.RegularExpressions.Regex.Match(text, @"\\pos\(([\d\.]+),([\d\.]+)\)");
+        var matchPos = System.Text.RegularExpressions.Regex.Match(text, @"\\pos\(([\d\.]+),([\d\.]+)\)");
+        var matchMove = System.Text.RegularExpressions.Regex.Match(text, @"\\move\(([\d\.]+),([\d\.]+),([\d\.]+),([\d\.]+)(?:,[^\)]*)?\)");
 
-        if (!match.Success) return;
+        double x = 0, y = 0;
+        bool hasPos = false;
 
-        if (double.TryParse(match.Groups[1].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double x) &&
-            double.TryParse(match.Groups[2].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double y))
+        if (matchMove.Success &&
+            double.TryParse(matchMove.Groups[1].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double mx1) &&
+            double.TryParse(matchMove.Groups[2].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double my1) &&
+            double.TryParse(matchMove.Groups[3].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double mx2) &&
+            double.TryParse(matchMove.Groups[4].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double my2))
         {
-            double vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
-            double vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
+            x = mx2; // Draw at end point or draw both, for simplicity just use end point
+            y = my2;
+            hasPos = true;
+        }
+        else if (matchPos.Success &&
+                 double.TryParse(matchPos.Groups[1].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double px) &&
+                 double.TryParse(matchPos.Groups[2].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double py))
+        {
+            x = px;
+            y = py;
+            hasPos = true;
+        }
+
+        if (hasPos)
+        {
+            double vidWidth = 0;
+            double vidHeight = 0;
 
             var prx = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResX", "[Script Info]", _subtitle.Header);
             var pry = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResY", "[Script Info]", _subtitle.Header);
@@ -24530,6 +24617,12 @@ public partial class MainViewModel :
             {
                 vidWidth = prxVal;
                 vidHeight = pryVal;
+            }
+
+            if (vidWidth == 0 || vidHeight == 0)
+            {
+                vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
+                vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
             }
 
             double cWidth = VideoPlayerControl.Bounds.Width;
@@ -24597,8 +24690,9 @@ public partial class MainViewModel :
 
         if (_isVisualPosMode && IsFormatAssa && SelectedSubtitle != null)
         {
+            e.Handled = true;
             _isDraggingPos = true;
-            UpdatePosFromEvent(e);
+            UpdatePosFromEvent(e, isStart: true);
         }
     }
 
@@ -24606,7 +24700,8 @@ public partial class MainViewModel :
     {
         if (_isVisualPosMode && _isDraggingPos && IsFormatAssa && SelectedSubtitle != null)
         {
-            UpdatePosFromEvent(e);
+            e.Handled = true;
+            UpdatePosFromEvent(e, isStart: false);
         }
     }
 
@@ -24614,19 +24709,20 @@ public partial class MainViewModel :
     {
         if (_isVisualPosMode && _isDraggingPos && IsFormatAssa && SelectedSubtitle != null)
         {
-            UpdatePosFromEvent(e);
+            e.Handled = true;
+            UpdatePosFromEvent(e, isStart: false);
             _isDraggingPos = false;
         }
     }
 
-    private void UpdatePosFromEvent(Avalonia.Input.PointerEventArgs e)
+    private void UpdatePosFromEvent(Avalonia.Input.PointerEventArgs e, bool isStart)
     {
         if (VideoPlayerControl == null || SelectedSubtitle == null) return;
         var pos = e.GetPosition(VideoPlayerControl);
         double cWidth = VideoPlayerControl.Bounds.Width;
         double cHeight = VideoPlayerControl.Bounds.Height;
-        double vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
-        double vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
+        double vidWidth = 0;
+        double vidHeight = 0;
 
         var prx = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResX", "[Script Info]", _subtitle.Header);
         var pry = Nikse.SubtitleEdit.Core.SubtitleFormats.AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResY", "[Script Info]", _subtitle.Header);
@@ -24637,7 +24733,13 @@ public partial class MainViewModel :
             vidHeight = pryVal;
         }
 
-        if (cWidth == 0 || cHeight == 0) return;
+        if (vidWidth == 0 || vidHeight == 0)
+        {
+            vidWidth = _mediaInfo?.Dimension.Width ?? 1920;
+            vidHeight = _mediaInfo?.Dimension.Height ?? 1080;
+        }
+
+        if (cWidth == 0 || cHeight == 0 || vidWidth == 0 || vidHeight == 0) return;
 
         double scaleX = cWidth / vidWidth;
         double scaleY = cHeight / vidHeight;
@@ -24651,18 +24753,57 @@ public partial class MainViewModel :
         int y = (int)System.Math.Round((pos.Y - offsetY) / minScale);
 
         var text = SelectedSubtitle.Text;
-        var match = System.Text.RegularExpressions.Regex.Match(text, @"\\pos\(([\d\.]+),([\d\.]+)\)");
-        if (match.Success)
+
+        if (isStart)
         {
-            text = text.Remove(match.Index, match.Length).Insert(match.Index, $"\\pos({x},{y})");
+            _dragStartX = x;
+            _dragStartY = y;
+        }
+
+        var matchPos = System.Text.RegularExpressions.Regex.Match(text, @"\\pos\(([\d\.]+),([\d\.]+)\)");
+        var matchMove = System.Text.RegularExpressions.Regex.Match(text, @"\\move\(([\d\.]+),([\d\.]+),([\d\.]+),([\d\.]+)(?:,[^\)]*)?\)");
+
+        int distSq = (x - _dragStartX) * (x - _dragStartX) + (y - _dragStartY) * (y - _dragStartY);
+        bool isDrag = !isStart && distSq > 25; // simple threshold
+
+        if (isDrag)
+        {
+            // Update or generate \move
+            if (matchMove.Success)
+            {
+                text = text.Remove(matchMove.Index, matchMove.Length).Insert(matchMove.Index, $"\\move({_dragStartX},{_dragStartY},{x},{y})");
+            }
+            else if (matchPos.Success)
+            {
+                text = text.Remove(matchPos.Index, matchPos.Length).Insert(matchPos.Index, $"\\move({_dragStartX},{_dragStartY},{x},{y})");
+            }
+            else
+            {
+                text = $"{{\\move({_dragStartX},{_dragStartY},{x},{y})}}" + text;
+                text = text.Replace("}{\\", "\\"); // merge adjacent tags
+            }
         }
         else
         {
-            text = $"{{\\pos({x},{y})}}" + text;
+            // Update or generate \pos
+            if (matchMove.Success)
+            {
+                text = text.Remove(matchMove.Index, matchMove.Length).Insert(matchMove.Index, $"\\pos({x},{y})");
+            }
+            else if (matchPos.Success)
+            {
+                text = text.Remove(matchPos.Index, matchPos.Length).Insert(matchPos.Index, $"\\pos({x},{y})");
+            }
+            else
+            {
+                text = $"{{\\pos({x},{y})}}" + text;
+                text = text.Replace("}{\\", "\\");
+            }
         }
-        SelectedSubtitle.Text = text;
 
+        SelectedSubtitle.Text = text;
         RefreshSubtitlePreview();
+        SubtitleTextChanged(this, null!); // Trigger UI sync if needed, though property change might handle it
         DrawVisualPosOverlay();
     }
 

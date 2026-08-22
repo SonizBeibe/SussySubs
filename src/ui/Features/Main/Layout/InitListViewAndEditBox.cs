@@ -1813,7 +1813,7 @@ public static partial class InitListViewAndEditBox
             var colorButton = UiUtil.MakeButton(vm.ShowColorPickerCommand, IconNames.Palette, Se.Language.Main.ColorHint);
             buttonPanel.Children.Add(colorButton);
 
-            var posVisualButton = UiUtil.MakeButton(vm.ToggleVisualPosModeCommand, IconNames.Image, "Toggle visual pos mode");
+            var posVisualButton = UiUtil.MakeButton(vm.ToggleVisualPosModeCommand, IconNames.Image, "Toggle \\pos and \\move visual tool");
             posVisualButton.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.OneWay });
             buttonPanel.Children.Add(posVisualButton);
 
